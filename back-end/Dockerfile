@@ -22,7 +22,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 COPY . .
 
-RUN python manage.py collectstatic --noinput
+RUN SECRET_KEY=dummy-build-only python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
