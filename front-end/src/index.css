@@ -796,10 +796,98 @@ a { color: inherit; text-decoration: none; }
 .step-number { padding-top: 0.6rem; font-weight: 600; color: var(--color-primary); min-width: 1.5rem; }
 .form-error { color: var(--color-danger); font-size: 0.85rem; }
 
+/* Supprimer les flèches natives sur tous les inputs number */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
 /* Input error state */
 .input-error {
   border-color: var(--color-danger) !important;
   outline-color: var(--color-danger) !important;
+}
+
+/* Stepper +/− (Portions) */
+.stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+.stepper.input-error { border-color: var(--color-danger); }
+
+.stepper-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, color 0.1s;
+}
+.stepper-btn:hover:not(:disabled) { background: var(--color-border); color: var(--color-text); }
+.stepper-btn:disabled { opacity: 0.35; cursor: default; }
+
+.stepper-input {
+  flex: 1;
+  border: none;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background: transparent;
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  font-family: var(--font-body);
+}
+.stepper-input:focus { outline: none; }
+
+/* Input avec suffixe "min" */
+.input-with-unit {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+.input-with-unit.input-error { border-color: var(--color-danger); }
+.input-with-unit input {
+  flex: 1;
+  border: none;
+  padding: 0.55rem 0.6rem;
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  background: transparent;
+  color: var(--color-text);
+  width: 0;
+  min-width: 0;
+}
+.input-with-unit input:focus { outline: none; }
+.input-unit {
+  padding: 0 0.6rem;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  border-left: 1px solid var(--color-border);
+  background: var(--color-bg);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Quantité ingrédient — plus étroit, spinnerless */
+.ingredient-qty-input {
+  flex: 0 0 80px !important;
+  min-width: 0 !important;
 }
 
 /* Button spinner (inline dans btn-primary) */

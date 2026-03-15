@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { createRecipe } from "../services/recipes";
 import { fetchIngredientNames, fetchUnits } from "../services/units";
 import IngredientCombobox from "../components/IngredientCombobox";
+import StepperInput from "../components/StepperInput";
 import {
   Dialog,
   DialogContent,
@@ -161,44 +162,49 @@ function RecipeForm() {
           <div className="form-row">
             <div className="form-group">
               <label>Portions *</label>
-              <input
+              <StepperInput
                 name="servings"
-                type="number"
-                min="1"
                 value={fields.servings}
                 onChange={updateField}
                 onBlur={() => touchField("servings")}
+                min={1}
+                max={50}
                 className={getFieldError("servings") ? "input-error" : ""}
-                required
               />
               {getFieldError("servings") && <p className="form-error">{getFieldError("servings")}</p>}
             </div>
             <div className="form-group">
-              <label>Préparation (min) *</label>
-              <input
-                name="prep_time"
-                type="number"
-                min="0"
-                value={fields.prep_time}
-                onChange={updateField}
-                onBlur={() => touchField("prep_time")}
-                className={getFieldError("prep_time") ? "input-error" : ""}
-                required
-              />
+              <label>Préparation *</label>
+              <div className={`input-with-unit ${getFieldError("prep_time") ? "input-error" : ""}`}>
+                <input
+                  name="prep_time"
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={fields.prep_time}
+                  onChange={updateField}
+                  onBlur={() => touchField("prep_time")}
+                  required
+                />
+                <span className="input-unit">min</span>
+              </div>
               {getFieldError("prep_time") && <p className="form-error">{getFieldError("prep_time")}</p>}
             </div>
             <div className="form-group">
-              <label>Cuisson (min) *</label>
-              <input
-                name="cook_time"
-                type="number"
-                min="0"
-                value={fields.cook_time}
-                onChange={updateField}
-                onBlur={() => touchField("cook_time")}
-                className={getFieldError("cook_time") ? "input-error" : ""}
-                required
-              />
+              <label>Cuisson *</label>
+              <div className={`input-with-unit ${getFieldError("cook_time") ? "input-error" : ""}`}>
+                <input
+                  name="cook_time"
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={fields.cook_time}
+                  onChange={updateField}
+                  onBlur={() => touchField("cook_time")}
+                  required
+                />
+                <span className="input-unit">min</span>
+              </div>
               {getFieldError("cook_time") && <p className="form-error">{getFieldError("cook_time")}</p>}
             </div>
           </div>
@@ -222,13 +228,15 @@ function RecipeForm() {
                 suggestions={ingredientNames}
               />
               <input
-                placeholder="Quantité"
+                placeholder="Qté"
                 type="number"
                 min="0.01"
                 step="any"
+                inputMode="decimal"
                 value={ing.quantity}
                 required={!!ing.name.trim()}
                 onChange={e => updateIngredient(i, "quantity", e.target.value)}
+                className="ingredient-qty-input"
               />
               <select
                 value={ing.unit}
