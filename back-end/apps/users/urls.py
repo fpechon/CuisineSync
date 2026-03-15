@@ -1,3 +1,7 @@
 from django.urls import path
 
-urlpatterns: list = []
+from .views import health_check
+
+urlpatterns = [
+    path("health/", health_check),
+]
