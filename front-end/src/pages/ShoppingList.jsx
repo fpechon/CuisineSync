@@ -26,28 +26,32 @@ function ShoppingList() {
   const { selectedIds } = useMealPlanStore();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [checked, setChecked] = useState({});
   const basketKey = selectedIds.join(",");
 
-  // Load checked state from localStorage, reset if basket changed
-  useEffect(() => {
-    const storedBasketKey = localStorage.getItem(BASKET_KEY);
-    if (storedBasketKey !== basketKey) {
-      setChecked({});
-      localStorage.setItem(BASKET_KEY, basketKey);
-      localStorage.removeItem(CHECKED_KEY);
-    } else {
-      try {
-        const stored = localStorage.getItem(CHECKED_KEY);
-        if (stored) setChecked(JSON.parse(stored));
-      } catch { /* ignore */ }
-    }
-  }, [basketKey]);
+  // Lazy init : lit localStorage une seule fois au montage, évite la race condition
+  const [checked, setChecked] = useState(() => {
+    try {
+      const storedKey = localStorage.getItem(BASKET_KEY);
+      if (storedKey !== basketKey) return {};
+      const stored = localStorage.getItem(CHECKED_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch { return {}; }
+  });
 
-  // Persist checked state to localStorage
+  // Persist checked à chaque changement (jamais {} au 1er render grâce au lazy init)
   useEffect(() => {
     localStorage.setItem(CHECKED_KEY, JSON.stringify(checked));
   }, [checked]);
+
+  // Reset si le panier change après le montage
+  useEffect(() => {
+    const storedKey = localStorage.getItem(BASKET_KEY);
+    if (storedKey !== basketKey) {
+      setChecked({});
+      localStorage.setItem(BASKET_KEY, basketKey);
+      localStorage.removeItem(CHECKED_KEY);
+    }
+  }, [basketKey]);
 
   useEffect(() => {
     if (selectedIds.length === 0) {
