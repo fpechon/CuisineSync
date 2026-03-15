@@ -1,11 +1,23 @@
-import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, NavLink, useNavigate } from "react-router-dom";
 import RecipeList from "./pages/RecipeList";
 import RecipeDetail from "./pages/RecipeDetail";
 import MealPlan from "./pages/MealPlan";
 import ShoppingList from "./pages/ShoppingList";
+import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 import useMealPlanStore from "./store/mealPlanStore";
+import useAuthStore from "./store/authStore";
+
 function Navbar() {
   const { selectedIds } = useMealPlanStore();
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    await logout();
+    navigate("/login");
+  }
 
   return (
     <nav className="navbar">
@@ -20,23 +32,44 @@ function Navbar() {
         <NavLink to="/liste-de-courses" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
           Liste de courses
         </NavLink>
+        {user && (
+          <div className="navbar-user">
+            <span className="navbar-username">{user.username}</span>
+            <button className="btn-logout" onClick={handleLogout}>Déconnexion</button>
+          </div>
+        )}
       </div>
     </nav>
+  );
+}
+
+function AppRoutes() {
+  const { init } = useAuthStore();
+
+  useEffect(() => {
+    init();
+  }, [init]);
+
+  return (
+    <>
+      <Navbar />
+      <main className="main-content">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<ProtectedRoute><RecipeList /></ProtectedRoute>} />
+          <Route path="/recettes/:id" element={<ProtectedRoute><RecipeDetail /></ProtectedRoute>} />
+          <Route path="/panier" element={<ProtectedRoute><MealPlan /></ProtectedRoute>} />
+          <Route path="/liste-de-courses" element={<ProtectedRoute><ShoppingList /></ProtectedRoute>} />
+        </Routes>
+      </main>
+    </>
   );
 }
 
 function App() {
   return (
     <BrowserRouter basename="/CuisineSync">
-      <Navbar />
-      <main className="main-content">
-        <Routes>
-          <Route path="/" element={<RecipeList />} />
-          <Route path="/recettes/:id" element={<RecipeDetail />} />
-          <Route path="/panier" element={<MealPlan />} />
-          <Route path="/liste-de-courses" element={<ShoppingList />} />
-        </Routes>
-      </main>
+      <AppRoutes />
     </BrowserRouter>
   );
 }

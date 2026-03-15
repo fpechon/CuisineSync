@@ -16,7 +16,11 @@ INSTALLED_APPS = [
     # Third-party
     "rest_framework",
     "corsheaders",
+    # Local
+    "users.apps.UsersConfig",
 ]
+
+AUTH_USER_MODEL = "users.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -80,6 +84,8 @@ REST_FRAMEWORK = {
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
+
+CORS_ALLOW_CREDENTIALS = True
 
 LOGGING = {
     "version": 1,

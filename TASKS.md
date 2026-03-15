@@ -4,23 +4,17 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 
 ---
 
-## En cours — M1 Interface recettes (front mockée)
+## En cours — M2 Auth basique
 
-- [ ] #20 — Structure pages React : RecipeList, RecipeDetail, MealPlan, ShoppingList
-- [ ] #21 — Données mockées (JSON) : 3 recettes exemple avec ingrédients
-- [ ] #22 — Page liste de recettes (cards cliquables)
-- [ ] #23 — Page détail d'une recette (ingrédients + étapes)
-- [ ] #24 — Sélection de recettes pour la semaine (panier localStorage)
-- [ ] #25 — Page liste de courses (agrégation des ingrédients par unité)
+- [ ] #27 — App Django `users` + endpoints `login` / `logout` / `me`
+- [ ] #28 — Tests Django pour les endpoints auth
+- [ ] #29 — Front : page de connexion
+- [ ] #30 — Front : service auth + état de session (Zustand)
+- [ ] #31 — Front : routes protégées + adapter la navbar
 
 ---
 
 ## Milestones à venir
-
-### M2 — Auth basique
-- Inscription / connexion / déconnexion via sessions Django
-- Un seul compte utilisateur (createsuperuser)
-- Front adapte l'UI selon l'état de session
 
 ### M3 — Back recettes + branchement API
 - Modèles `Recipe` + `Ingredient` en base PostgreSQL
@@ -39,6 +33,20 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 ---
 
 ## Fait (milestones terminés)
+
+### M1 — Interface recettes (front mockée) ✅
+
+- [x] #20 — Structure pages React : RecipeList, RecipeDetail, MealPlan, ShoppingList
+- [x] #21 — Données mockées (JSON) : 3 recettes exemple avec ingrédients
+- [x] #22 — Page liste de recettes (cards cliquables)
+- [x] #23 — Page détail d'une recette (ingrédients + étapes)
+- [x] #24 — Sélection de recettes pour la semaine (panier localStorage)
+- [x] #25 — Page liste de courses (agrégation des ingrédients par unité)
+
+**Validé localement :**
+- `http://localhost:5173/CuisineSync/` → liste de recettes ✓
+- Panier persisté en localStorage ✓
+- Agrégation Carbonara + Minestrone → 600g spaghetti ✓
 
 ### M0 — Squelette ✅
 
