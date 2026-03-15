@@ -1,10 +1,25 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import recipes from "../data/recipes";
 import useMealPlanStore from "../store/mealPlanStore";
+import { fetchRecipe } from "../services/recipes";
 
 function MealPlan() {
   const { selectedIds, removeRecipe, clear } = useMealPlanStore();
-  const selectedRecipes = recipes.filter((r) => selectedIds.includes(r.id));
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (selectedIds.length === 0) {
+      setRecipes([]);
+      setLoading(false);
+      return;
+    }
+    Promise.all(selectedIds.map(fetchRecipe))
+      .then(setRecipes)
+      .finally(() => setLoading(false));
+  }, [selectedIds.join(",")]);
+
+  if (loading) return <div className="page"><p>Chargement…</p></div>;
 
   return (
     <div className="page">
@@ -12,7 +27,7 @@ function MealPlan() {
         <h1>Panier de la semaine</h1>
         <div className="page-header-actions">
           <Link to="/" className="link-back">← Recettes</Link>
-          {selectedRecipes.length > 0 && (
+          {recipes.length > 0 && (
             <Link to="/liste-de-courses" className="btn-primary">
               Voir la liste de courses
             </Link>
@@ -20,7 +35,7 @@ function MealPlan() {
         </div>
       </div>
 
-      {selectedRecipes.length === 0 ? (
+      {recipes.length === 0 ? (
         <div className="empty-state">
           <p>Aucune recette dans le panier.</p>
           <Link to="/" className="btn-primary">Parcourir les recettes</Link>
@@ -28,13 +43,13 @@ function MealPlan() {
       ) : (
         <>
           <ul className="meal-plan-list">
-            {selectedRecipes.map((recipe) => (
+            {recipes.map((recipe) => (
               <li key={recipe.id} className="meal-plan-item">
                 <Link to={`/recettes/${recipe.id}`} className="meal-plan-name">
                   {recipe.name}
                 </Link>
                 <div className="meal-plan-meta">
-                  <span>⏱ {recipe.prepTime + recipe.cookTime} min</span>
+                  <span>⏱ {recipe.prep_time + recipe.cook_time} min</span>
                   <span>👥 {recipe.servings} portions</span>
                 </div>
                 <button

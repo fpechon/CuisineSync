@@ -1,17 +1,18 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import recipes from "../data/recipes";
 import useMealPlanStore from "../store/mealPlanStore";
+import { fetchRecipe } from "../services/recipes";
 
-function aggregateIngredients(selectedRecipes) {
+function aggregateIngredients(recipes) {
   const map = {};
 
-  for (const recipe of selectedRecipes) {
+  for (const recipe of recipes) {
     for (const ing of recipe.ingredients) {
       const key = `${ing.name}__${ing.unit}`;
       if (map[key]) {
-        map[key].quantity += ing.quantity;
+        map[key].quantity += parseFloat(ing.quantity);
       } else {
-        map[key] = { name: ing.name, quantity: ing.quantity, unit: ing.unit };
+        map[key] = { name: ing.name, quantity: parseFloat(ing.quantity), unit: ing.unit };
       }
     }
   }
@@ -21,8 +22,23 @@ function aggregateIngredients(selectedRecipes) {
 
 function ShoppingList() {
   const { selectedIds } = useMealPlanStore();
-  const selectedRecipes = recipes.filter((r) => selectedIds.includes(r.id));
-  const ingredients = aggregateIngredients(selectedRecipes);
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (selectedIds.length === 0) {
+      setRecipes([]);
+      setLoading(false);
+      return;
+    }
+    Promise.all(selectedIds.map(fetchRecipe))
+      .then(setRecipes)
+      .finally(() => setLoading(false));
+  }, [selectedIds.join(",")]);
+
+  if (loading) return <div className="page"><p>Chargement…</p></div>;
+
+  const ingredients = aggregateIngredients(recipes);
 
   return (
     <div className="page">
@@ -39,8 +55,8 @@ function ShoppingList() {
       ) : (
         <>
           <p className="shopping-subtitle">
-            Pour {selectedRecipes.length} recette{selectedRecipes.length > 1 ? "s" : ""} :{" "}
-            {selectedRecipes.map((r) => r.name).join(", ")}
+            Pour {recipes.length} recette{recipes.length > 1 ? "s" : ""} :{" "}
+            {recipes.map((r) => r.name).join(", ")}
           </p>
           <ul className="shopping-list">
             {ingredients.map((ing, i) => (
