@@ -14,6 +14,7 @@ function MealPlan() {
       setLoading(false);
       return;
     }
+    setLoading(true);
     Promise.all(selectedIds.map(fetchRecipe))
       .then(setRecipes)
       .finally(() => setLoading(false));
@@ -27,7 +28,7 @@ function MealPlan() {
         <h1>Panier de la semaine</h1>
         <div className="page-header-actions">
           <Link to="/" className="link-back">← Recettes</Link>
-          {recipes.length > 0 && (
+          {selectedIds.length > 0 && (
             <Link to="/liste-de-courses" className="btn-primary">
               Voir la liste de courses
             </Link>
@@ -35,7 +36,7 @@ function MealPlan() {
         </div>
       </div>
 
-      {recipes.length === 0 ? (
+      {selectedIds.length === 0 ? (
         <div className="empty-state">
           <p>Aucune recette dans le panier.</p>
           <Link to="/" className="btn-primary">Parcourir les recettes</Link>

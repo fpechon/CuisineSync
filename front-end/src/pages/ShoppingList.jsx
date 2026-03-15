@@ -31,6 +31,7 @@ function ShoppingList() {
       setLoading(false);
       return;
     }
+    setLoading(true);
     Promise.all(selectedIds.map(fetchRecipe))
       .then(setRecipes)
       .finally(() => setLoading(false));
