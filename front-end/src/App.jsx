@@ -1,121 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
-
-function App() {
-  const [count, setCount] = useState(0)
+import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
+import RecipeList from "./pages/RecipeList";
+import RecipeDetail from "./pages/RecipeDetail";
+import MealPlan from "./pages/MealPlan";
+import ShoppingList from "./pages/ShoppingList";
+import useMealPlanStore from "./store/mealPlanStore";
+function Navbar() {
+  const { selectedIds } = useMealPlanStore();
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <nav className="navbar">
+      <NavLink to="/" className="navbar-brand">CuisineSync</NavLink>
+      <div className="navbar-links">
+        <NavLink to="/" end className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
+          Recettes
+        </NavLink>
+        <NavLink to="/panier" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
+          Panier {selectedIds.length > 0 && <span className="badge">{selectedIds.length}</span>}
+        </NavLink>
+        <NavLink to="/liste-de-courses" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
+          Liste de courses
+        </NavLink>
+      </div>
+    </nav>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <BrowserRouter basename="/CuisineSync">
+      <Navbar />
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<RecipeList />} />
+          <Route path="/recettes/:id" element={<RecipeDetail />} />
+          <Route path="/panier" element={<MealPlan />} />
+          <Route path="/liste-de-courses" element={<ShoppingList />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
+  );
+}
+
+export default App;

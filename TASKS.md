@@ -4,12 +4,37 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 
 ---
 
-## Prochain milestone — M1 Authentification
+## En cours — M1 Interface recettes (front mockée)
 
-- [ ] Modèle `User` custom (extend AbstractUser)
-- [ ] Endpoints : inscription, connexion, déconnexion, profil
-- [ ] Authentification par sessions Django (cookie + CSRF)
-- [ ] Tests Django/DRF pour chaque endpoint
+- [ ] #20 — Structure pages React : RecipeList, RecipeDetail, MealPlan, ShoppingList
+- [ ] #21 — Données mockées (JSON) : 3 recettes exemple avec ingrédients
+- [ ] #22 — Page liste de recettes (cards cliquables)
+- [ ] #23 — Page détail d'une recette (ingrédients + étapes)
+- [ ] #24 — Sélection de recettes pour la semaine (panier localStorage)
+- [ ] #25 — Page liste de courses (agrégation des ingrédients par unité)
+
+---
+
+## Milestones à venir
+
+### M2 — Auth basique
+- Inscription / connexion / déconnexion via sessions Django
+- Un seul compte utilisateur (createsuperuser)
+- Front adapte l'UI selon l'état de session
+
+### M3 — Back recettes + branchement API
+- Modèles `Recipe` + `Ingredient` en base PostgreSQL
+- CRUD recettes via DRF
+- Front remplace les mocks JSON par la vraie API
+
+### M4 — Panier + liste de courses persistée
+- `MealPlan` en base, lié à l'utilisateur Django
+- Agrégation des ingrédients côté serveur (même unité d'abord)
+- Persistance multi-appareils
+
+### M5 — Inventaire
+- Ingrédients déjà à la maison
+- Soustraits automatiquement de la liste de courses
 
 ---
 
