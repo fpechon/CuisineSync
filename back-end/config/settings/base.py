@@ -85,6 +85,8 @@ REST_FRAMEWORK = {
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 
+CORS_ALLOW_CREDENTIALS = True
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

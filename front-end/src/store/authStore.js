@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { fetchMe, login as apiLogin, logout as apiLogout } from "../services/auth";
+import useMealPlanStore from "./mealPlanStore";
 
 const useAuthStore = create((set) => ({
   user: null,
@@ -22,6 +23,7 @@ const useAuthStore = create((set) => ({
 
   logout: async () => {
     await apiLogout();
+    useMealPlanStore.getState().clear();
     set({ user: null });
   },
 }));
