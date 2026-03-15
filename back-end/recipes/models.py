@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -39,3 +40,13 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f"{self.quantity} {self.unit} {self.ingredient.name}"
+
+
+class MealPlan(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="meal_plan"
+    )
+    recipes = models.ManyToManyField(Recipe, blank=True, related_name="meal_plans")
+
+    def __str__(self):
+        return f"Panier de {self.user}"

@@ -10,6 +10,7 @@ const useAuthStore = create((set) => ({
     try {
       const user = await fetchMe();
       set({ user, loading: false });
+      await useMealPlanStore.getState().fetchMealPlan();
     } catch {
       set({ user: null, loading: false });
     }
@@ -18,12 +19,13 @@ const useAuthStore = create((set) => ({
   login: async (username, password) => {
     const user = await apiLogin(username, password);
     set({ user });
+    await useMealPlanStore.getState().fetchMealPlan();
     return user;
   },
 
   logout: async () => {
     await apiLogout();
-    useMealPlanStore.getState().clear();
+    useMealPlanStore.getState().resetStore();
     set({ user: null });
   },
 }));

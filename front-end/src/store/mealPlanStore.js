@@ -1,29 +1,40 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import {
+  addRecipeToMealPlan,
+  clearMealPlan,
+  getMealPlan,
+  removeRecipeFromMealPlan,
+} from "../services/mealPlan";
 
-const useMealPlanStore = create(
-  persist(
-    (set, get) => ({
-      selectedIds: [],
+const useMealPlanStore = create((set, get) => ({
+  selectedIds: [],
 
-      addRecipe: (id) =>
-        set((state) => ({
-          selectedIds: state.selectedIds.includes(id)
-            ? state.selectedIds
-            : [...state.selectedIds, id],
-        })),
+  fetchMealPlan: async () => {
+    const data = await getMealPlan();
+    set({ selectedIds: data.recipe_ids });
+  },
 
-      removeRecipe: (id) =>
-        set((state) => ({
-          selectedIds: state.selectedIds.filter((r) => r !== id),
-        })),
+  addRecipe: async (id) => {
+    set((state) => ({ selectedIds: [...new Set([...state.selectedIds, id])] }));
+    const data = await addRecipeToMealPlan(id);
+    set({ selectedIds: data.recipe_ids });
+  },
 
-      isSelected: (id) => get().selectedIds.includes(id),
+  removeRecipe: async (id) => {
+    set((state) => ({ selectedIds: state.selectedIds.filter((r) => r !== id) }));
+    const data = await removeRecipeFromMealPlan(id);
+    set({ selectedIds: data.recipe_ids });
+  },
 
-      clear: () => set({ selectedIds: [] }),
-    }),
-    { name: "cuisinesync-meal-plan" }
-  )
-);
+  clear: async () => {
+    set({ selectedIds: [] });
+    const data = await clearMealPlan();
+    set({ selectedIds: data.recipe_ids });
+  },
+
+  isSelected: (id) => get().selectedIds.includes(id),
+
+  resetStore: () => set({ selectedIds: [] }),
+}));
 
 export default useMealPlanStore;
