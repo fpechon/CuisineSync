@@ -87,6 +87,13 @@ cuisinesync/
 - Pas de `print()` en production — utiliser le logger Django configuré
 
 ### Back-end (Django)
+
+**Règles impératives sur la génération de code Django :**
+- Toujours utiliser `python manage.py startapp <name>` pour créer une app — jamais à la main
+- Toujours utiliser `python manage.py makemigrations` pour créer des migrations — jamais à la main
+- Ne jamais écrire manuellement les fichiers générés par ces commandes (`apps.py`, `migrations/`, etc.)
+- Les settings de configuration (`base.py`, `local.py`, `production.py`) sont l'exception : ils sont écrits à la main car `startproject` ne génère qu'un seul `settings.py`
+
 - Une app Django par domaine métier : `users`, `recipes`, `inventory`, `shopping`
 - Nommage des fichiers : `snake_case` (convention Python)
 - Nommage des classes : `PascalCase`
