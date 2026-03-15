@@ -32,8 +32,10 @@ function ShoppingList() {
       return;
     }
     setLoading(true);
-    Promise.all(selectedIds.map(fetchRecipe))
-      .then(setRecipes)
+    Promise.allSettled(selectedIds.map(fetchRecipe))
+      .then((results) => {
+        setRecipes(results.filter((r) => r.status === "fulfilled").map((r) => r.value));
+      })
       .finally(() => setLoading(false));
   }, [selectedIds.join(",")]);
 
