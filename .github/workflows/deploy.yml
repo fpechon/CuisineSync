@@ -19,7 +19,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             set -e
-            cd /home/deploy/cuisinesync
+            cd /home/deploy/CuisineSync
             git pull origin main
             docker compose up -d --build
             docker compose exec -T back python manage.py migrate --noinput
