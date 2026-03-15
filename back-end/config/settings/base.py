@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -15,11 +16,6 @@ INSTALLED_APPS = [
     # Third-party
     "rest_framework",
     "corsheaders",
-    # Apps
-    "apps.users",
-    "apps.recipes",
-    "apps.inventory",
-    "apps.shopping",
 ]
 
 MIDDLEWARE = [
@@ -52,17 +48,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("POSTGRES_DB", default="cuisinesync"),
-        "USER": config("POSTGRES_USER", default="cuisinesync"),
-        "PASSWORD": config("POSTGRES_PASSWORD"),
-        "HOST": config("POSTGRES_HOST", default="db"),
-        "PORT": config("POSTGRES_PORT", default="5432"),
-    }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -99,20 +84,9 @@ SESSION_COOKIE_SAMESITE = "Lax"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "WARNING",
-    },
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "WARNING"},
     "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
+        "django": {"handlers": ["console"], "level": "INFO", "propagate": False},
     },
 }

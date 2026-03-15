@@ -14,6 +14,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    ports:
+      - "5432:5432"
 
   back:
     build: ./back-end
@@ -26,15 +28,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: >
-      sh -c "python manage.py migrate --noinput &&
-             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2"
 
   front:
     build: ./front-end
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "3000:80"
     depends_on:
       - back
 
