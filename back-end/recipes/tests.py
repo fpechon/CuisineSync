@@ -153,6 +153,24 @@ class UnitListViewTest(APITestCase):
         self.assertEqual(self.client.get("/api/v1/recipes/units/").status_code, 403)
 
 
+class IngredientListViewTest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
+        self.client.force_login(self.user)
+        Ingredient.objects.create(name="ail")
+        Ingredient.objects.create(name="tomates")
+
+    def test_returns_ingredient_names(self):
+        response = self.client.get("/api/v1/recipes/ingredients/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("ail", response.data)
+        self.assertIn("tomates", response.data)
+
+    def test_requires_auth(self):
+        self.client.logout()
+        self.assertEqual(self.client.get("/api/v1/recipes/ingredients/").status_code, 403)
+
+
 class RecipeCreateViewTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass123")
@@ -181,6 +199,12 @@ class RecipeCreateViewTest(APITestCase):
         response = self.client.post("/api/v1/recipes/", self.valid_payload, format="json")
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Ingredient.objects.filter(name="ail").count(), 1)
+
+    def test_create_reuses_ingredient_case_insensitive(self):
+        Ingredient.objects.create(name="Ail")
+        response = self.client.post("/api/v1/recipes/", self.valid_payload, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Ingredient.objects.filter(name__iexact="ail").count(), 1)
 
     def test_missing_name_returns_400(self):
         payload = {**self.valid_payload, "name": ""}

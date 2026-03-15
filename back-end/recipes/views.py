@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import MealPlan, Recipe
+from .models import Ingredient, MealPlan, Recipe
 from .serializers import RecipeCreateSerializer, RecipeDetailSerializer, RecipeListSerializer
 from .units import UNITS
 
@@ -27,6 +27,12 @@ class RecipeDetailView(RetrieveAPIView):
 class UnitListView(APIView):
     def get(self, request):
         return Response(UNITS)
+
+
+class IngredientListView(APIView):
+    def get(self, request):
+        names = Ingredient.objects.values_list("name", flat=True).order_by("name")
+        return Response(list(names))
 
 
 def _meal_plan_response(meal_plan):

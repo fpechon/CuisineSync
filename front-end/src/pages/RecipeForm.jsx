@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createRecipe } from "../services/recipes";
-import { fetchUnits } from "../services/units";
+import { fetchIngredientNames, fetchUnits } from "../services/units";
 
 const EMPTY_INGREDIENT = { name: "", quantity: "", unit: "" };
 const EMPTY_STEP = "";
@@ -9,6 +9,7 @@ const EMPTY_STEP = "";
 function RecipeForm() {
   const navigate = useNavigate();
   const [units, setUnits] = useState([]);
+  const [ingredientNames, setIngredientNames] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -24,6 +25,7 @@ function RecipeForm() {
 
   useEffect(() => {
     fetchUnits().then(setUnits).catch(() => {});
+    fetchIngredientNames().then(setIngredientNames).catch(() => {});
   }, []);
 
   function updateField(e) {
@@ -113,10 +115,15 @@ function RecipeForm() {
         <section className="form-section">
           <h2>Ingrédients</h2>
           {errors.ingredients && <p className="form-error">{errors.ingredients}</p>}
+          <datalist id="ingredient-suggestions">
+            {ingredientNames.map((name) => <option key={name} value={name} />)}
+          </datalist>
+
           {ingredients.map((ing, i) => (
             <div key={i} className="form-row form-ingredient-row">
               <input
                 placeholder="Ingrédient"
+                list="ingredient-suggestions"
                 value={ing.name}
                 onChange={(e) => updateIngredient(i, "name", e.target.value)}
               />

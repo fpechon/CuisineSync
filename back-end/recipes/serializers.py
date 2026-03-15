@@ -59,7 +59,11 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ingredients_data = validated_data.pop("ingredients")
         recipe = Recipe.objects.create(**validated_data)
         for ing in ingredients_data:
-            ingredient, _ = Ingredient.objects.get_or_create(name=ing["name"].strip())
+            name = ing["name"].strip()
+            try:
+                ingredient = Ingredient.objects.get(name__iexact=name)
+            except Ingredient.DoesNotExist:
+                ingredient = Ingredient.objects.create(name=name)
             RecipeIngredient.objects.create(
                 recipe=recipe,
                 ingredient=ingredient,
