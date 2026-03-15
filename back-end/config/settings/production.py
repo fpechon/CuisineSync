@@ -24,4 +24,4 @@ CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS", cast=lambda v: [h.strip() for h in v.split(",")]
 )
 
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
