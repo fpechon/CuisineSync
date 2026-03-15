@@ -236,7 +236,6 @@ function RecipeForm() {
                 value={ing.quantity}
                 required={!!ing.name.trim()}
                 onChange={e => updateIngredient(i, "quantity", e.target.value)}
-                className="ingredient-qty-input"
               />
               <select
                 value={ing.unit}
