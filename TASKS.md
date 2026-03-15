@@ -10,12 +10,15 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 
 ---
 
-## Milestones à venir
+## En cours — M4 Panier persisté en base
 
-### M4 — Panier + liste de courses persistée
-- `MealPlan` en base, lié à l'utilisateur Django
-- Agrégation des ingrédients côté serveur (même unité d'abord)
-- Persistance multi-appareils
+- [x] #42 — Back: modèle `MealPlan` + migration (OneToOneField User, ManyToManyField Recipe)
+- [x] #43 — Back: endpoints CRUD `/api/v1/meal-plan/` (GET, POST add, DELETE remove, DELETE clear)
+- [x] #44 — Back: tests endpoints panier (8 tests)
+- [x] #45 — Front: service `mealPlan.js` + `mealPlanStore` sans persist (optimistic update)
+- [x] #46 — Front: init panier au login/chargement, reset mémoire au logout
+
+## Milestones à venir
 
 ### M5 — Inventaire
 - Ingrédients déjà à la maison
