@@ -67,7 +67,7 @@ function RecipeForm() {
         prep_time: Number(fields.prep_time),
         cook_time: Number(fields.cook_time),
         steps: steps.filter((s) => s.trim()),
-        ingredients: ingredients.filter((ing) => ing.name.trim()),
+        ingredients: ingredients.filter((ing) => ing.name.trim() && ing.quantity && ing.unit),
       });
       navigate(`/recettes/${recipe.id}`);
     } catch (err) {
@@ -114,7 +114,13 @@ function RecipeForm() {
 
         <section className="form-section">
           <h2>Ingrédients</h2>
-          {errors.ingredients && <p className="form-error">{errors.ingredients}</p>}
+          {errors.ingredients && (
+            <p className="form-error">
+              {typeof errors.ingredients === "string"
+                ? errors.ingredients
+                : "Vérifiez les ingrédients : nom, quantité et unité sont requis."}
+            </p>
+          )}
           <datalist id="ingredient-suggestions">
             {ingredientNames.map((name) => <option key={name} value={name} />)}
           </datalist>
@@ -130,16 +136,18 @@ function RecipeForm() {
               <input
                 placeholder="Quantité"
                 type="number"
-                min="0"
+                min="0.01"
                 step="any"
                 value={ing.quantity}
+                required={!!ing.name.trim()}
                 onChange={(e) => updateIngredient(i, "quantity", e.target.value)}
               />
               <select
                 value={ing.unit}
+                required={!!ing.name.trim()}
                 onChange={(e) => updateIngredient(i, "unit", e.target.value)}
               >
-                <option value="">Unité</option>
+                <option value="" disabled>Unité</option>
                 {units.map((u) => <option key={u} value={u}>{u}</option>)}
               </select>
               {ingredients.length > 1 && (
