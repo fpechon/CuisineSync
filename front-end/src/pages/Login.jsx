@@ -27,8 +27,12 @@ function Login() {
   return (
     <div className="login-wrapper">
       <div className="login-card">
-        <h1 className="login-title">CuisineSync</h1>
-        <p className="login-subtitle">Connectez-vous pour accéder à vos recettes</p>
+        <div className="login-brand">
+          <span className="login-brand-icon">🍳</span>
+          <h1 className="login-title">CuisineSync</h1>
+        </div>
+        <p className="login-subtitle">Votre carnet de recettes personnel</p>
+
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
             <label htmlFor="username">Nom d'utilisateur</label>
