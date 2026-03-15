@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import useMealPlanStore from "../store/mealPlanStore";
 
 const CARD_COLORS = [
@@ -23,7 +24,15 @@ function RecipeCard({ recipe }) {
 
   function handleToggle(e) {
     e.preventDefault();
-    selected ? removeRecipe(recipe.id) : addRecipe(recipe.id);
+    if (selected) {
+      removeRecipe(recipe.id);
+      toast("Retiré du panier", {
+        action: { label: "Annuler", onClick: () => addRecipe(recipe.id) },
+      });
+    } else {
+      addRecipe(recipe.id);
+      toast.success(`"${recipe.name}" ajouté au panier`);
+    }
   }
 
   return (
