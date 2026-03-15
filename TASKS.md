@@ -4,22 +4,17 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 
 ---
 
-## En cours — M2 Auth basique
+## Prochain milestone — M3 Back recettes + branchement API
 
-- [ ] #27 — App Django `users` + endpoints `login` / `logout` / `me`
-- [ ] #28 — Tests Django pour les endpoints auth
-- [ ] #29 — Front : page de connexion
-- [ ] #30 — Front : service auth + état de session (Zustand)
-- [ ] #31 — Front : routes protégées + adapter la navbar
+- [ ] App Django `recipes` via `manage.py startapp recipes`
+- [ ] Modèles `Recipe` + `Ingredient` + `RecipeIngredient` en base PostgreSQL
+- [ ] Serializers DRF + endpoints CRUD recettes
+- [ ] Tests Django/DRF
+- [ ] Front : service `recipes.js` + remplacement des mocks JSON par la vraie API
 
 ---
 
 ## Milestones à venir
-
-### M3 — Back recettes + branchement API
-- Modèles `Recipe` + `Ingredient` en base PostgreSQL
-- CRUD recettes via DRF
-- Front remplace les mocks JSON par la vraie API
 
 ### M4 — Panier + liste de courses persistée
 - `MealPlan` en base, lié à l'utilisateur Django
@@ -34,6 +29,19 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 
 ## Fait (milestones terminés)
 
+### M2 — Auth basique ✅
+
+- [x] #27 — App Django `users` + endpoints `login` / `logout` / `me`
+- [x] #28 — Tests Django pour les endpoints auth (7/7 verts)
+- [x] #29 — Front : page de connexion
+- [x] #30 — Front : service auth + état de session (Zustand)
+- [x] #31 — Front : routes protégées + adapter la navbar
+
+**Validé en production :**
+- `http://212.227.88.212/CuisineSync/` → redirigé vers `/login` ✓
+- Connexion / déconnexion fonctionnelles ✓
+- Admin Django accessible via tunnel SSH ✓
+
 ### M1 — Interface recettes (front mockée) ✅
 
 - [x] #20 — Structure pages React : RecipeList, RecipeDetail, MealPlan, ShoppingList
@@ -42,11 +50,6 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 - [x] #23 — Page détail d'une recette (ingrédients + étapes)
 - [x] #24 — Sélection de recettes pour la semaine (panier localStorage)
 - [x] #25 — Page liste de courses (agrégation des ingrédients par unité)
-
-**Validé localement :**
-- `http://localhost:5173/CuisineSync/` → liste de recettes ✓
-- Panier persisté en localStorage ✓
-- Agrégation Carbonara + Minestrone → 600g spaghetti ✓
 
 ### M0 — Squelette ✅
 
@@ -58,7 +61,3 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 - [x] #8 — CI/CD GitHub Actions fonctionnel (push main → deploy SSH → docker compose up)
 - [x] #14 — Health check `GET /api/v1/health/` → `{"status": "ok"}`
 - [x] #15 — Vite base path `/CuisineSync/` pour assets corrects sous Nginx
-
-**Validé en production :**
-- `http://212.227.88.212/CuisineSync/` → page React ✓
-- `http://212.227.88.212/CuisineSync/api/v1/health/` → `{"status": "ok"}` ✓
