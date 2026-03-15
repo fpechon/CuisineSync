@@ -26,6 +26,7 @@ Développeur solo. Développement en local via WSL2, déploiement sur VPS via SS
 | Validation API | Django REST Framework serializers |
 | Déploiement | Docker Compose + Nginx séparé (reverse proxy) |
 | Serveur WSGI | Gunicorn |
+| Gestionnaire d'env Python | uv (pyproject.toml + uv.lock) |
 | CI/CD | GitHub Actions |
 | Versioning | Git + GitHub |
 
@@ -46,7 +47,8 @@ cuisinesync/
 │
 ├── back-end/
 │   ├── Dockerfile
-│   ├── requirements.txt
+│   ├── pyproject.toml          # Dépendances Python (géré par uv)
+│   ├── uv.lock                 # Lock file reproductible (commité)
 │   ├── manage.py
 │   ├── config/                 # Projet Django principal
 │   │   ├── settings/
@@ -155,11 +157,10 @@ docker-compose up -d db
 # Back-end
 cd back-end
 cp .env.example .env          # remplir les variables la première fois
-python3 -m venv venv
-source venv/bin/activate
-python3 -m pip install -r requirements.txt
-python3 manage.py migrate
-python3 manage.py runserver    # port 8000
+uv sync                       # crée .venv et installe les deps depuis uv.lock
+source .venv/bin/activate
+python manage.py migrate
+python manage.py runserver    # port 8000
 
 # Front-end (dans un autre terminal)
 cd front-end
@@ -168,28 +169,33 @@ npm install
 npm run dev                   # port 5173
 ```
 
-### Gestion de l'environnement virtuel
+### Gestion de l'environnement virtuel (uv)
 
-**Important** : Toujours utiliser un venv pour isoler les dépendances du projet. Ne jamais installer directement dans le Python système.
+**Important** : Le projet utilise [uv](https://docs.astral.sh/uv/) pour gérer les dépendances Python. `uv sync` crée automatiquement le `.venv` et installe les deps épinglées dans `uv.lock`.
 
 ```bash
-# Créer le venv (une seule fois)
+# Installer uv (une seule fois sur la machine)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Installer les dépendances (depuis uv.lock — reproductible)
 cd back-end
-python3 -m venv venv
+uv sync
 
-# Activer le venv (avant chaque session)
-source venv/bin/activate
+# Activer le venv
+source .venv/bin/activate
 
-# Désactiver le venv (quand tu as fini)
-deactivate
+# Ajouter une nouvelle dépendance
+uv add nom-du-paquet           # met à jour pyproject.toml ET uv.lock
+
+# Mettre à jour uv.lock sans changer les versions spécifiées
+uv lock
 ```
 
-**Pourquoi ?** Si tu as plusieurs projets Python, sans venv, les dépendances peuvent entrer en conflit. Chaque projet a son propre venv = isolation garantie.
-
-**À faire systématiquement :**
-- Crée le venv une seule fois
-- Mais **active** le venv avant **chaque** session de développement
-- Toujours vérifie que le prompt montre `(venv)` avant d'installer des paquets
+**Pourquoi uv ?**
+- `uv sync --frozen` dans le Dockerfile garantit des builds Docker reproductibles
+- `uv.lock` épingle *toutes* les dépendances transitives (pas seulement les directes)
+- Beaucoup plus rapide que pip
+- `pyproject.toml` est le standard Python moderne (PEP 517/518)
 
 ### Variables d'environnement back-end (.env)
 
@@ -383,6 +389,7 @@ Pas de GitHub Projects — TASKS.md remplace le suivi granulaire.
 | Sessions Django | Front servi par Nginx sur le même domaine en production — sessions plus simples et robustes que JWT pour ce cas d'usage |
 | PostgreSQL | Données relationnelles, requêtes complexes pour les suggestions de recettes |
 | Nginx hors Docker | Plus simple à configurer pour HTTPS avec Certbot, gestion des fichiers statiques React |
+| uv au lieu de pip | Lock file complet (deps transitives), builds Docker reproductibles, plus rapide |
 | Gunicorn comme WSGI | Standard de production pour Django, compatible avec Docker |
 | Zustand pour l'état front | Plus simple que Redux, suffisant pour ce périmètre |
 | Pas de GitHub Projects | TASKS.md + milestones GitHub couvrent le besoin pour un projet solo |
