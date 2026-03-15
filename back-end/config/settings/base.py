@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     "corsheaders",
     # Local
     "users.apps.UsersConfig",
+    "recipes.apps.RecipesConfig",
 ]
 
 AUTH_USER_MODEL = "users.User"

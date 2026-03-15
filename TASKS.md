@@ -4,16 +4,6 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 
 ---
 
-## Prochain milestone — M3 Back recettes + branchement API
-
-- [ ] App Django `recipes` via `manage.py startapp recipes`
-- [ ] Modèles `Recipe` + `Ingredient` + `RecipeIngredient` en base PostgreSQL
-- [ ] Serializers DRF + endpoints CRUD recettes
-- [ ] Tests Django/DRF
-- [ ] Front : service `recipes.js` + remplacement des mocks JSON par la vraie API
-
----
-
 ## Milestones à venir
 
 ### M4 — Panier + liste de courses persistée
@@ -28,6 +18,16 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 ---
 
 ## Fait (milestones terminés)
+
+### M3 — Back recettes + branchement API ✅
+
+- [x] #34 — App Django `recipes` + modèles `Recipe`, `Ingredient`, `RecipeIngredient`
+- [x] #35 — Serializers DRF + endpoints lecture (`GET /api/v1/recipes/`, `GET /api/v1/recipes/{id}/`)
+- [x] #36 — Tests DRF pour les endpoints recettes
+- [x] #37 — Fixtures : 3 recettes exemples en base
+- [x] #38 — Front : service `recipes.js` + remplacement des mocks JSON par la vraie API
+
+**Note future :** Ajouter la saisie de recettes dans l'app React (formulaire création/édition), pour ne pas dépendre de l'admin Django.
 
 ### M2 — Auth basique ✅
 

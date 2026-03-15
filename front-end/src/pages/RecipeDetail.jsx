@@ -1,20 +1,29 @@
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import recipes from "../data/recipes";
 import useMealPlanStore from "../store/mealPlanStore";
+import { fetchRecipe } from "../services/recipes";
 
 function RecipeDetail() {
   const { id } = useParams();
-  const recipe = recipes.find((r) => r.id === id);
+  const [recipe, setRecipe] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { isSelected, addRecipe, removeRecipe } = useMealPlanStore();
 
-  if (!recipe) {
-    return (
-      <div className="page">
-        <p>Recette introuvable.</p>
-        <Link to="/" className="link-back">← Retour aux recettes</Link>
-      </div>
-    );
-  }
+  useEffect(() => {
+    fetchRecipe(id)
+      .then(setRecipe)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return <div className="page"><p>Chargement…</p></div>;
+  if (error) return (
+    <div className="page">
+      <p className="login-error">{error}</p>
+      <Link to="/" className="link-back">← Retour aux recettes</Link>
+    </div>
+  );
 
   const selected = isSelected(recipe.id);
 
@@ -30,8 +39,8 @@ function RecipeDetail() {
         <h1>{recipe.name}</h1>
         <p className="recipe-description">{recipe.description}</p>
         <div className="recipe-meta">
-          <span>⏱ Préparation : {recipe.prepTime} min</span>
-          <span>🍳 Cuisson : {recipe.cookTime} min</span>
+          <span>⏱ Préparation : {recipe.prep_time} min</span>
+          <span>🍳 Cuisson : {recipe.cook_time} min</span>
           <span>👥 {recipe.servings} portions</span>
         </div>
         <button
@@ -46,9 +55,9 @@ function RecipeDetail() {
         <section className="recipe-ingredients">
           <h2>Ingrédients</h2>
           <ul>
-            {recipe.ingredients.map((ing, i) => (
-              <li key={i}>
-                <strong>{ing.quantity} {ing.unit}</strong> {ing.name}
+            {recipe.ingredients.map((ing) => (
+              <li key={ing.id}>
+                <strong>{Number.isInteger(Number(ing.quantity)) ? Number(ing.quantity) : Number(ing.quantity).toFixed(1)} {ing.unit}</strong> {ing.name}
               </li>
             ))}
           </ul>

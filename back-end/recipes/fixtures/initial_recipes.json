@@ -1,0 +1,99 @@
+[
+  {"model": "recipes.ingredient", "pk": 1, "fields": {"name": "spaghetti"}},
+  {"model": "recipes.ingredient", "pk": 2, "fields": {"name": "lardons fumés"}},
+  {"model": "recipes.ingredient", "pk": 3, "fields": {"name": "œufs"}},
+  {"model": "recipes.ingredient", "pk": 4, "fields": {"name": "parmesan râpé"}},
+  {"model": "recipes.ingredient", "pk": 5, "fields": {"name": "ail"}},
+  {"model": "recipes.ingredient", "pk": 6, "fields": {"name": "poivre noir"}},
+  {"model": "recipes.ingredient", "pk": 7, "fields": {"name": "tomates concassées"}},
+  {"model": "recipes.ingredient", "pk": 8, "fields": {"name": "haricots blancs"}},
+  {"model": "recipes.ingredient", "pk": 9, "fields": {"name": "carottes"}},
+  {"model": "recipes.ingredient", "pk": 10, "fields": {"name": "oignons"}},
+  {"model": "recipes.ingredient", "pk": 11, "fields": {"name": "courgettes"}},
+  {"model": "recipes.ingredient", "pk": 12, "fields": {"name": "bouillon de légumes"}},
+  {"model": "recipes.ingredient", "pk": 13, "fields": {"name": "huile d'olive"}},
+  {"model": "recipes.ingredient", "pk": 14, "fields": {"name": "poulet entier"}},
+  {"model": "recipes.ingredient", "pk": 15, "fields": {"name": "citron"}},
+  {"model": "recipes.ingredient", "pk": 16, "fields": {"name": "herbes de Provence"}},
+  {"model": "recipes.ingredient", "pk": 17, "fields": {"name": "beurre"}},
+  {"model": "recipes.ingredient", "pk": 18, "fields": {"name": "sel"}},
+
+  {"model": "recipes.recipe", "pk": 1, "fields": {
+    "name": "Spaghetti Carbonara",
+    "description": "Un classique italien crémeux, sans crème — juste des œufs, du parmesan et de bons lardons.",
+    "servings": 4,
+    "prep_time": 10,
+    "cook_time": 20,
+    "created_at": "2026-01-01T00:00:00Z",
+    "steps": [
+      "Porter une grande casserole d'eau salée à ébullition. Cuire les spaghetti al dente selon les instructions du paquet.",
+      "Faire revenir les lardons à feu moyen dans une grande poêle jusqu'à ce qu'ils soient dorés. Ajouter l'ail écrasé 1 minute.",
+      "Dans un bol, fouetter les œufs avec le parmesan râpé et beaucoup de poivre noir.",
+      "Égoutter les pâtes en réservant une tasse d'eau de cuisson. Retirer la poêle du feu.",
+      "Ajouter les pâtes chaudes dans la poêle avec les lardons. Verser le mélange œufs/parmesan et mélanger vivement en ajoutant un peu d'eau de cuisson pour obtenir une sauce crémeuse.",
+      "Servir immédiatement avec du parmesan supplémentaire et du poivre."
+    ]
+  }},
+  {"model": "recipes.recipe", "pk": 2, "fields": {
+    "name": "Soupe Minestrone",
+    "description": "Une soupe italienne généreuse et réconfortante, pleine de légumes et de pâtes.",
+    "servings": 4,
+    "prep_time": 15,
+    "cook_time": 35,
+    "created_at": "2026-01-01T00:00:00Z",
+    "steps": [
+      "Émincer l'oignon et l'ail. Couper les carottes et les courgettes en dés.",
+      "Dans une grande casserole, faire chauffer l'huile d'olive à feu moyen. Faire revenir l'oignon et l'ail 3 minutes.",
+      "Ajouter les carottes et cuire 5 minutes supplémentaires.",
+      "Ajouter les tomates concassées, le bouillon de légumes et les haricots blancs. Porter à ébullition.",
+      "Casser les spaghetti en morceaux et les ajouter à la soupe. Cuire 10 minutes.",
+      "Ajouter les courgettes et cuire encore 5 minutes. Rectifier l'assaisonnement.",
+      "Servir avec du parmesan râpé et un filet d'huile d'olive."
+    ]
+  }},
+  {"model": "recipes.recipe", "pk": 3, "fields": {
+    "name": "Poulet Rôti au Citron et aux Herbes",
+    "description": "Un poulet rôti parfumé aux herbes de Provence et au citron, croustillant dehors et moelleux dedans.",
+    "servings": 4,
+    "prep_time": 10,
+    "cook_time": 90,
+    "created_at": "2026-01-01T00:00:00Z",
+    "steps": [
+      "Préchauffer le four à 200°C (thermostat 6-7).",
+      "Mélanger l'huile d'olive, le jus d'un citron, les herbes de Provence, le sel et le poivre.",
+      "Badigeonner le poulet avec ce mélange, y compris sous la peau si possible.",
+      "Glisser les gousses d'ail écrasées et l'autre citron coupé en quartiers à l'intérieur du poulet.",
+      "Déposer le beurre en noisettes sur le poulet. Enfourner 90 minutes en arrosant régulièrement.",
+      "Laisser reposer 10 minutes avant de découper."
+    ]
+  }},
+
+  {"model": "recipes.recipeingredient", "pk": 1,  "fields": {"recipe": 1, "ingredient": 1,  "quantity": "400.00", "unit": "g"}},
+  {"model": "recipes.recipeingredient", "pk": 2,  "fields": {"recipe": 1, "ingredient": 2,  "quantity": "200.00", "unit": "g"}},
+  {"model": "recipes.recipeingredient", "pk": 3,  "fields": {"recipe": 1, "ingredient": 3,  "quantity": "4.00",   "unit": "pièce(s)"}},
+  {"model": "recipes.recipeingredient", "pk": 4,  "fields": {"recipe": 1, "ingredient": 4,  "quantity": "100.00", "unit": "g"}},
+  {"model": "recipes.recipeingredient", "pk": 5,  "fields": {"recipe": 1, "ingredient": 5,  "quantity": "2.00",   "unit": "gousse(s)"}},
+  {"model": "recipes.recipeingredient", "pk": 6,  "fields": {"recipe": 1, "ingredient": 6,  "quantity": "1.00",   "unit": "pincée(s)"}},
+
+  {"model": "recipes.recipeingredient", "pk": 7,  "fields": {"recipe": 2, "ingredient": 1,  "quantity": "200.00", "unit": "g"}},
+  {"model": "recipes.recipeingredient", "pk": 8,  "fields": {"recipe": 2, "ingredient": 7,  "quantity": "400.00", "unit": "g"}},
+  {"model": "recipes.recipeingredient", "pk": 9,  "fields": {"recipe": 2, "ingredient": 8,  "quantity": "200.00", "unit": "g"}},
+  {"model": "recipes.recipeingredient", "pk": 10, "fields": {"recipe": 2, "ingredient": 9,  "quantity": "2.00",   "unit": "pièce(s)"}},
+  {"model": "recipes.recipeingredient", "pk": 11, "fields": {"recipe": 2, "ingredient": 10, "quantity": "1.00",   "unit": "pièce(s)"}},
+  {"model": "recipes.recipeingredient", "pk": 12, "fields": {"recipe": 2, "ingredient": 5,  "quantity": "3.00",   "unit": "gousse(s)"}},
+  {"model": "recipes.recipeingredient", "pk": 13, "fields": {"recipe": 2, "ingredient": 11, "quantity": "1.00",   "unit": "pièce(s)"}},
+  {"model": "recipes.recipeingredient", "pk": 14, "fields": {"recipe": 2, "ingredient": 12, "quantity": "1.50",   "unit": "L"}},
+  {"model": "recipes.recipeingredient", "pk": 15, "fields": {"recipe": 2, "ingredient": 13, "quantity": "3.00",   "unit": "cuillère(s) à soupe"}},
+  {"model": "recipes.recipeingredient", "pk": 16, "fields": {"recipe": 2, "ingredient": 4,  "quantity": "50.00",  "unit": "g"}},
+  {"model": "recipes.recipeingredient", "pk": 17, "fields": {"recipe": 2, "ingredient": 6,  "quantity": "1.00",   "unit": "pincée(s)"}},
+  {"model": "recipes.recipeingredient", "pk": 18, "fields": {"recipe": 2, "ingredient": 18, "quantity": "1.00",   "unit": "pincée(s)"}},
+
+  {"model": "recipes.recipeingredient", "pk": 19, "fields": {"recipe": 3, "ingredient": 14, "quantity": "1.00",   "unit": "pièce(s)"}},
+  {"model": "recipes.recipeingredient", "pk": 20, "fields": {"recipe": 3, "ingredient": 15, "quantity": "2.00",   "unit": "pièce(s)"}},
+  {"model": "recipes.recipeingredient", "pk": 21, "fields": {"recipe": 3, "ingredient": 5,  "quantity": "4.00",   "unit": "gousse(s)"}},
+  {"model": "recipes.recipeingredient", "pk": 22, "fields": {"recipe": 3, "ingredient": 16, "quantity": "2.00",   "unit": "cuillère(s) à soupe"}},
+  {"model": "recipes.recipeingredient", "pk": 23, "fields": {"recipe": 3, "ingredient": 13, "quantity": "3.00",   "unit": "cuillère(s) à soupe"}},
+  {"model": "recipes.recipeingredient", "pk": 24, "fields": {"recipe": 3, "ingredient": 17, "quantity": "30.00",  "unit": "g"}},
+  {"model": "recipes.recipeingredient", "pk": 25, "fields": {"recipe": 3, "ingredient": 18, "quantity": "1.00",   "unit": "pincée(s)"}},
+  {"model": "recipes.recipeingredient", "pk": 26, "fields": {"recipe": 3, "ingredient": 6,  "quantity": "1.00",   "unit": "pincée(s)"}}
+]

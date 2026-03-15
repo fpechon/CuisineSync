@@ -16,7 +16,7 @@ function RecipeCard({ recipe }) {
         <h2 className="recipe-card-title">{recipe.name}</h2>
         <p className="recipe-card-description">{recipe.description}</p>
         <div className="recipe-card-meta">
-          <span>⏱ {recipe.prepTime + recipe.cookTime} min</span>
+          <span>⏱ {recipe.prep_time + recipe.cook_time} min</span>
           <span>👥 {recipe.servings} portions</span>
         </div>
       </div>
