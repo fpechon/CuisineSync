@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { Toaster } from "sonner";
 import RecipeList from "./pages/RecipeList";
 import RecipeDetail from "./pages/RecipeDetail";
 import RecipeForm from "./pages/RecipeForm";
@@ -63,6 +64,7 @@ function AppRoutes() {
 
   return (
     <>
+      <Toaster position="bottom-center" richColors closeButton />
       <Navbar />
       <main className="main-content">
         <Routes>

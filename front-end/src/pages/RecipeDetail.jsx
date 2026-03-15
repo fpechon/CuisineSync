@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { toast } from "sonner";
 import useMealPlanStore from "../store/mealPlanStore";
 import { fetchRecipe } from "../services/recipes";
 
@@ -75,7 +76,15 @@ function RecipeDetail() {
   const totalTime = recipe.prep_time + recipe.cook_time;
 
   function handleToggle() {
-    selected ? removeRecipe(recipe.id) : addRecipe(recipe.id);
+    if (selected) {
+      removeRecipe(recipe.id);
+      toast("Retiré du panier", {
+        action: { label: "Annuler", onClick: () => addRecipe(recipe.id) },
+      });
+    } else {
+      addRecipe(recipe.id);
+      toast.success("Ajouté au panier");
+    }
   }
 
   return (

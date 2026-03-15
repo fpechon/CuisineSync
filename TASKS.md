@@ -70,11 +70,9 @@ Objectif : migrer le cœur de l'app — la navigation dans les recettes. Vérifi
 
 Objectif : migrer et corriger le flux principal de l'app. Vérifiable en ajoutant des recettes au panier et en générant la liste de courses.
 
-- [ ] #XX — Installer Sonner (toast notifications)
-- [ ] #XX — Toast de confirmation à l'ajout/retrait du panier (RecipeCard + RecipeDetail)
-- [ ] #XX — MealPlan migré : résumé (nb recettes, temps total), CTA "Générer la liste" proéminent, confirmation avant "Vider le panier"
-- [ ] #XX — ShoppingList migrée : checkboxes persistées en localStorage (reset si le panier change)
-- [ ] #XX — ShoppingList : bouton "Copier la liste" (Clipboard API)
+- [ ] #72 — Installer Sonner + toasts panier avec undo (RecipeCard + RecipeDetail)
+- [ ] #73 — MealPlan migré : résumé (nb recettes, temps total), CTA "Générer la liste" proéminent, dialog shadcn confirmation avant "Vider le panier"
+- [ ] #74 — ShoppingList migrée : checkboxes persistées en localStorage (reset si le panier change) + bouton "Copier la liste" (Clipboard API)
 
 ### M-UX5 — Formulaire de création + polissage final (RecipeForm, Combobox, mobile)
 

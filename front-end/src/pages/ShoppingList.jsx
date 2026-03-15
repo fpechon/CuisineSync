@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import useMealPlanStore from "../store/mealPlanStore";
 import { fetchRecipe } from "../services/recipes";
 
+const CHECKED_KEY = "cs_shopping_checked";
+const BASKET_KEY = "cs_shopping_basket_key";
+
 function aggregateIngredients(recipes) {
   const map = {};
-
   for (const recipe of recipes) {
     for (const ing of recipe.ingredients) {
       const key = `${ing.name}__${ing.unit}`;
@@ -16,7 +19,6 @@ function aggregateIngredients(recipes) {
       }
     }
   }
-
   return Object.values(map).sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -24,6 +26,32 @@ function ShoppingList() {
   const { selectedIds } = useMealPlanStore();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const basketKey = selectedIds.join(",");
+
+  // Lazy init : lit localStorage une seule fois au montage, évite la race condition
+  const [checked, setChecked] = useState(() => {
+    try {
+      const storedKey = localStorage.getItem(BASKET_KEY);
+      if (storedKey !== basketKey) return {};
+      const stored = localStorage.getItem(CHECKED_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch { return {}; }
+  });
+
+  // Persist checked à chaque changement (jamais {} au 1er render grâce au lazy init)
+  useEffect(() => {
+    localStorage.setItem(CHECKED_KEY, JSON.stringify(checked));
+  }, [checked]);
+
+  // Reset si le panier change après le montage
+  useEffect(() => {
+    const storedKey = localStorage.getItem(BASKET_KEY);
+    if (storedKey !== basketKey) {
+      setChecked({});
+      localStorage.setItem(BASKET_KEY, basketKey);
+      localStorage.removeItem(CHECKED_KEY);
+    }
+  }, [basketKey]);
 
   useEffect(() => {
     if (selectedIds.length === 0) {
@@ -37,11 +65,33 @@ function ShoppingList() {
         setRecipes(results.filter((r) => r.status === "fulfilled").map((r) => r.value));
       })
       .finally(() => setLoading(false));
-  }, [selectedIds.join(",")]);
+  }, [basketKey]);
 
-  if (loading) return <div className="page"><p>Chargement…</p></div>;
+  function toggleItem(key) {
+    setChecked((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
+  if (loading) return (
+    <div className="spinner-wrapper">
+      <div className="spinner" />
+    </div>
+  );
 
   const ingredients = aggregateIngredients(recipes);
+  const checkedCount = ingredients.filter((ing) => checked[`${ing.name}__${ing.unit}`]).length;
+
+  function copyList() {
+    const header = `Liste de courses — CuisineSync\n${recipes.map((r) => r.name).join(", ")}\n\n`;
+    const lines = ingredients.map((ing) => {
+      const qty = Number.isInteger(ing.quantity) ? ing.quantity : ing.quantity.toFixed(1);
+      const key = `${ing.name}__${ing.unit}`;
+      const check = checked[key] ? "✓" : "☐";
+      return `${check} ${qty} ${ing.unit} ${ing.name}`;
+    }).join("\n");
+    navigator.clipboard.writeText(header + lines).then(() => {
+      toast.success("Liste copiée dans le presse-papier !");
+    });
+  }
 
   return (
     <div className="page">
@@ -52,32 +102,40 @@ function ShoppingList() {
 
       {selectedIds.length === 0 ? (
         <div className="empty-state">
+          <span style={{ fontSize: "3rem" }}>🛒</span>
           <p>Aucune recette sélectionnée.</p>
           <Link to="/" className="btn-primary">Parcourir les recettes</Link>
         </div>
       ) : (
         <>
-          <p className="shopping-subtitle">
-            Pour {recipes.length} recette{recipes.length > 1 ? "s" : ""} :{" "}
-            {recipes.map((r) => r.name).join(", ")}
-          </p>
+          <div className="shopping-header">
+            <p className="shopping-subtitle">
+              {recipes.length} recette{recipes.length > 1 ? "s" : ""} · {ingredients.length} ingrédient{ingredients.length > 1 ? "s" : ""}
+              {checkedCount > 0 && ` · ${checkedCount}/${ingredients.length} cochés`}
+            </p>
+            <button className="btn-secondary" onClick={copyList}>
+              📋 Copier la liste
+            </button>
+          </div>
+
           <ul className="shopping-list">
-            {ingredients.map((ing, i) => (
-              <li key={i} className="shopping-item">
-                <label>
-                  <input type="checkbox" />
-                  <span>
-                    <strong>
-                      {Number.isInteger(ing.quantity)
-                        ? ing.quantity
-                        : ing.quantity.toFixed(1)}{" "}
-                      {ing.unit}
-                    </strong>{" "}
-                    {ing.name}
+            {ingredients.map((ing) => {
+              const key = `${ing.name}__${ing.unit}`;
+              const isChecked = !!checked[key];
+              const qty = Number.isInteger(ing.quantity) ? ing.quantity : ing.quantity.toFixed(1);
+              return (
+                <li
+                  key={key}
+                  className={`shopping-item ${isChecked ? "checked" : ""}`}
+                  onClick={() => toggleItem(key)}
+                >
+                  <span className="shopping-checkbox">{isChecked ? "✓" : ""}</span>
+                  <span className="shopping-item-text">
+                    <strong>{qty} {ing.unit}</strong> {ing.name}
                   </span>
-                </label>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         </>
       )}
