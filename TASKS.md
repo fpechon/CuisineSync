@@ -4,6 +4,12 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 
 ---
 
+## Notes techniques à ne pas oublier
+
+- **SESSION_COOKIE_SECURE** : quand un domaine + HTTPS sera configuré sur le VPS, retirer `SESSION_COOKIE_SECURE=False` du `.env` du VPS pour revenir à `True` (défaut).
+
+---
+
 ## Milestones à venir
 
 ### M4 — Panier + liste de courses persistée
