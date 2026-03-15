@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useBlocker } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { createRecipe } from "../services/recipes";
 import { fetchIngredientNames, fetchUnits } from "../services/units";
 import IngredientCombobox from "../components/IngredientCombobox";
@@ -48,13 +48,21 @@ function RecipeForm() {
   const [steps, setSteps] = useState([EMPTY_STEP]);
   const [ingredients, setIngredients] = useState([{ ...EMPTY_INGREDIENT }]);
 
+  const [leaveOpen, setLeaveOpen] = useState(false);
+
   const isDirty =
     fields.name.trim() !== "" ||
     fields.description.trim() !== "" ||
     ingredients.some(ing => ing.name.trim() !== "") ||
     steps.some(s => s.trim() !== "");
 
-  const blocker = useBlocker(isDirty && !submitting);
+  // Interception fermeture onglet / rechargement
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
 
   useEffect(() => {
     fetchUnits().then(setUnits).catch(() => {});
@@ -118,7 +126,13 @@ function RecipeForm() {
 
   return (
     <div className="page">
-      <Link to="/" className="link-back">← Retour aux recettes</Link>
+      <button
+        type="button"
+        className="link-back"
+        onClick={() => isDirty ? setLeaveOpen(true) : navigate("/")}
+      >
+        ← Retour aux recettes
+      </button>
       <h1>Nouvelle recette</h1>
 
       <form className="recipe-form" onSubmit={handleSubmit}>
@@ -269,7 +283,7 @@ function RecipeForm() {
 
       </form>
 
-      <Dialog open={blocker.state === "blocked"} onOpenChange={() => blocker.reset?.()}>
+      <Dialog open={leaveOpen} onOpenChange={setLeaveOpen}>
         <DialogContent className="dialog-paprika">
           <DialogHeader>
             <DialogTitle>Quitter sans enregistrer ?</DialogTitle>
@@ -278,10 +292,10 @@ function RecipeForm() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <button className="btn-secondary" onClick={() => blocker.reset?.()}>
+            <button className="btn-secondary" onClick={() => setLeaveOpen(false)}>
               Continuer la saisie
             </button>
-            <button className="btn-danger" onClick={() => blocker.proceed?.()}>
+            <button className="btn-danger" onClick={() => navigate("/")}>
               Quitter
             </button>
           </DialogFooter>
