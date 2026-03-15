@@ -24,11 +24,14 @@ function RecipeList() {
     <div className="page">
       <div className="page-header">
         <h1>Mes recettes</h1>
-        {selectedIds.length > 0 && (
-          <Link to="/panier" className="btn-primary">
-            Voir le panier ({selectedIds.length})
-          </Link>
-        )}
+        <div className="page-header-actions">
+          <Link to="/recettes/nouvelle" className="btn-secondary">+ Nouvelle recette</Link>
+          {selectedIds.length > 0 && (
+            <Link to="/panier" className="btn-primary">
+              Voir le panier ({selectedIds.length})
+            </Link>
+          )}
+        </div>
       </div>
       <div className="recipe-grid">
         {recipes.map((recipe) => (
