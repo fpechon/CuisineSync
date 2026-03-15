@@ -51,11 +51,11 @@ Objectif : poser les fondations visuelles sans rien casser. À la fin de ce mile
 
 Objectif : migrer l'enveloppe de l'app (ce qui est toujours visible ou visible en premier). Vérifiable indépendamment du contenu.
 
-- [ ] #XX — Composant `<Spinner />` (shadcn/ui Skeleton ou CSS), utilisé dans ProtectedRoute (fin de l'écran blanc au chargement)
-- [ ] #XX — Page 404 : route catch-all `*` → composant `NotFound` avec lien retour
-- [ ] #XX — Navbar migrée : logo SVG/icône + Playfair Display, active link selon la route courante
-- [ ] #XX — Page Login migrée : layout split ou card centrée stylée, typographie, bouton shadcn
-- [ ] #XX — Mobile navbar : barre de navigation inférieure sur < 768px (icônes + labels)
+- [x] #61 — Composant `<Spinner />` CSS, utilisé dans ProtectedRoute (fin de l'écran blanc au chargement)
+- [x] #62 — Page 404 : route catch-all `*` → composant `NotFound` avec lien retour
+- [x] #63 — Navbar : icône 🍳 + underline active, liens masqués sur mobile
+- [x] #64 — Page Login : branding CuisineSync, sous-titre, card redessinée
+- [x] #65 — BottomNav mobile : barre fixe en bas < 768px (Recettes / Panier / Courses)
 
 ### M-UX3 — Pages de contenu (RecipeList, RecipeCard, RecipeDetail)
 
