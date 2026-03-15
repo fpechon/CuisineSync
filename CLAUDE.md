@@ -400,21 +400,31 @@ Pas de GitHub Projects — TASKS.md remplace le suivi granulaire.
 
 *Mise à jour quand quelque chose ne fonctionne pas comme prévu. Ne jamais supprimer une entrée.*
 
-*(vide pour l'instant — projet non démarré)*
+### M0 — Docker + déploiement
+
+- **`uv sync` crée toujours un `.venv`** — `UV_SYSTEM_PYTHON=1` ne s'applique qu'à `uv pip`, pas `uv sync`. Toujours ajouter `ENV PATH="/app/.venv/bin:$PATH"` après `uv sync` dans le Dockerfile.
+
+- **Ne jamais exécuter `manage.py` pendant le build Docker** — les secrets (`SECRET_KEY`, `POSTGRES_PASSWORD`) ne sont disponibles qu'au runtime. Utiliser un `entrypoint.sh` qui exécute `collectstatic` + `migrate` au démarrage du container.
+
+- **Tester le déploiement manuellement sur le VPS avant de déboguer via GitHub Actions** — le feedback loop par PR/merge est trop lent. SSH + `docker compose up --build` directement sur le VPS est bien plus efficace.
+
+- **Nginx multi-projets sur un VPS** : utiliser des snippets par projet (`/etc/nginx/snippets/projet.conf`) inclus dans le server block par défaut. Chaque projet sur un sous-chemin (`/NomProjet/`), pas à la racine `/`.
+
+- **Vite base path** : si le frontend est servi sous un sous-chemin Nginx, configurer `base: '/NomProjet/'` dans `vite.config.js`, sinon les assets JS/CSS sont résolus depuis `/` et génèrent des 404.
 
 ---
 
 ## État du projet
 
-**Date de dernière mise à jour :** à remplir à chaque session
+**Date de dernière mise à jour :** 2026-03-15
 
-**Milestone en cours :** M0 — Squelette
+**Milestone en cours :** M1 — Authentification
 
-**Prochaine action :** Initialiser la structure du repo, docker-compose de base, squelette Django + React
+**Prochaine action :** Modèle User custom, endpoints inscription/connexion/déconnexion par sessions Django
 
 **Milestones :**
-- [ ] M0 — Squelette (structure, Docker, CI/CD, déploiement vide sur VPS)
-- [ ] M1 — Authentification (inscription, connexion, JWT)
+- [x] M0 — Squelette (structure, Docker, CI/CD, déploiement validé sur VPS)
+- [ ] M1 — Authentification (inscription, connexion, sessions Django)
 - [ ] M2 — CRUD Recettes (sans photos)
 - [ ] M3 — Inventaire + bibliothèque d'ingrédients normalisés
 - [ ] M4 — Liste de courses + conversion d'unités
