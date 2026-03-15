@@ -2,9 +2,7 @@ FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    DJANGO_SETTINGS_MODULE=config.settings.production \
-    UV_SYSTEM_PYTHON=1 \
-    UV_NO_CACHE=1
+    DJANGO_SETTINGS_MODULE=config.settings.production
 
 WORKDIR /app
 
@@ -18,6 +16,9 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 # Installer les dépendances depuis le lock file (reproductible)
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-editable
+
+# Mettre le venv créé par uv dans le PATH
+ENV PATH="/app/.venv/bin:$PATH"
 
 COPY . .
 
