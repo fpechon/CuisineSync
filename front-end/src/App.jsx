@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, NavLink, useNavigate } from "react-router-dom";
 import RecipeList from "./pages/RecipeList";
 import RecipeDetail from "./pages/RecipeDetail";
+import RecipeForm from "./pages/RecipeForm";
 import MealPlan from "./pages/MealPlan";
 import ShoppingList from "./pages/ShoppingList";
 import Login from "./pages/Login";
@@ -57,6 +58,7 @@ function AppRoutes() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><RecipeList /></ProtectedRoute>} />
+          <Route path="/recettes/nouvelle" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
           <Route path="/recettes/:id" element={<ProtectedRoute><RecipeDetail /></ProtectedRoute>} />
           <Route path="/panier" element={<ProtectedRoute><MealPlan /></ProtectedRoute>} />
           <Route path="/liste-de-courses" element={<ProtectedRoute><ShoppingList /></ProtectedRoute>} />

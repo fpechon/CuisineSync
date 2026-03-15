@@ -135,3 +135,76 @@ class MealPlanViewTest(APITestCase):
         self.client.force_login(self.other)
         response = self.client.get("/api/v1/meal-plan/")
         self.assertEqual(response.data["recipe_ids"], [])
+
+
+class UnitListViewTest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
+        self.client.force_login(self.user)
+
+    def test_returns_list(self):
+        response = self.client.get("/api/v1/recipes/units/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.data, list)
+        self.assertIn("g", response.data)
+
+    def test_requires_auth(self):
+        self.client.logout()
+        self.assertEqual(self.client.get("/api/v1/recipes/units/").status_code, 403)
+
+
+class RecipeCreateViewTest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass123")
+        self.client.force_login(self.user)
+        self.valid_payload = {
+            "name": "Pâtes à l'ail",
+            "description": "Simple et rapide.",
+            "servings": 2,
+            "prep_time": 5,
+            "cook_time": 10,
+            "steps": ["Cuire les pâtes.", "Faire revenir l'ail."],
+            "ingredients": [
+                {"name": "spaghetti", "quantity": "200", "unit": "g"},
+                {"name": "ail", "quantity": "2", "unit": "gousse(s)"},
+            ],
+        }
+
+    def test_create_valid_recipe(self):
+        response = self.client.post("/api/v1/recipes/", self.valid_payload, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["name"], "Pâtes à l'ail")
+        self.assertEqual(len(response.data["ingredients"]), 2)
+
+    def test_create_reuses_existing_ingredient(self):
+        Ingredient.objects.create(name="ail")
+        response = self.client.post("/api/v1/recipes/", self.valid_payload, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Ingredient.objects.filter(name="ail").count(), 1)
+
+    def test_missing_name_returns_400(self):
+        payload = {**self.valid_payload, "name": ""}
+        response = self.client.post("/api/v1/recipes/", payload, format="json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_empty_ingredients_returns_400(self):
+        payload = {**self.valid_payload, "ingredients": []}
+        response = self.client.post("/api/v1/recipes/", payload, format="json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_empty_steps_returns_400(self):
+        payload = {**self.valid_payload, "steps": []}
+        response = self.client.post("/api/v1/recipes/", payload, format="json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_invalid_unit_returns_400(self):
+        payload = {**self.valid_payload, "ingredients": [
+            {"name": "ail", "quantity": "2", "unit": "louche"},
+        ]}
+        response = self.client.post("/api/v1/recipes/", payload, format="json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_requires_auth(self):
+        self.client.logout()
+        response = self.client.post("/api/v1/recipes/", self.valid_payload, format="json")
+        self.assertEqual(response.status_code, 403)

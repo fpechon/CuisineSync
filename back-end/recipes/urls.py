@@ -5,4 +5,5 @@ from . import views
 urlpatterns = [
     path("", views.RecipeListView.as_view(), name="recipe-list"),
     path("<int:pk>/", views.RecipeDetailView.as_view(), name="recipe-detail"),
+    path("units/", views.UnitListView.as_view(), name="unit-list"),
 ]

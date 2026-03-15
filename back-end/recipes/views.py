@@ -4,17 +4,29 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import MealPlan, Recipe
-from .serializers import RecipeDetailSerializer, RecipeListSerializer
+from .serializers import RecipeCreateSerializer, RecipeDetailSerializer, RecipeListSerializer
+from .units import UNITS
 
 
 class RecipeListView(ListAPIView):
     queryset = Recipe.objects.all()
     serializer_class = RecipeListSerializer
 
+    def post(self, request):
+        serializer = RecipeCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        recipe = serializer.save()
+        return Response(RecipeDetailSerializer(recipe).data, status=status.HTTP_201_CREATED)
+
 
 class RecipeDetailView(RetrieveAPIView):
     queryset = Recipe.objects.prefetch_related("recipe_ingredients__ingredient")
     serializer_class = RecipeDetailSerializer
+
+
+class UnitListView(APIView):
+    def get(self, request):
+        return Response(UNITS)
 
 
 def _meal_plan_response(meal_plan):
