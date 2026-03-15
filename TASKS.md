@@ -61,11 +61,10 @@ Objectif : migrer l'enveloppe de l'app (ce qui est toujours visible ou visible e
 
 Objectif : migrer le cœur de l'app — la navigation dans les recettes. Vérifiable en parcourant les recettes et en en ouvrant une.
 
-- [ ] #XX — RecipeCard migrée : image placeholder colorée (hash du nom) + layout shadcn Card
-- [ ] #XX — RecipeList migrée : grid Tailwind, header avec actions, empty state avec illustration et CTA
-- [ ] #XX — Skeleton loading pour RecipeList (remplace le texte "Chargement…")
-- [ ] #XX — RecipeDetail migrée : hero bandeau coloré, étapes visuelles avec numéros en cercles, ingrédients cochables (état local)
-- [ ] #XX — RecipeDetail : gestion explicite du 404 (recette introuvable → message + lien retour)
+- [x] #67 — RecipeCard : bandeau coloré (hash du nom), bouton panier pleine largeur, temps total
+- [x] #68 — RecipeList : 6 skeleton cards animées au chargement, empty state avec CTA
+- [x] #69 — RecipeDetail : hero bandeau coloré, étapes avec cercles numérotés, ingrédients cochables (état local)
+- [x] #70 — RecipeDetail : 404 explicite (recette introuvable → page dédiée + lien retour)
 
 ### M-UX4 — Flux panier & liste de courses (MealPlan, ShoppingList, Toasts)
 

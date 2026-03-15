@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import RecipeCard from "../components/RecipeCard";
+import RecipeCardSkeleton from "../components/RecipeCardSkeleton";
 import useMealPlanStore from "../store/mealPlanStore";
 import { fetchRecipes } from "../services/recipes";
 
@@ -17,8 +18,11 @@ function RecipeList() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="page"><p>Chargement des recettes…</p></div>;
-  if (error) return <div className="page"><p className="login-error">{error}</p></div>;
+  if (error) return (
+    <div className="page">
+      <p className="login-error">{error}</p>
+    </div>
+  );
 
   return (
     <div className="page">
@@ -33,11 +37,26 @@ function RecipeList() {
           )}
         </div>
       </div>
-      <div className="recipe-grid">
-        {recipes.map((recipe) => (
-          <RecipeCard key={recipe.id} recipe={recipe} />
-        ))}
-      </div>
+
+      {loading ? (
+        <div className="recipe-grid">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <RecipeCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : recipes.length === 0 ? (
+        <div className="empty-state">
+          <span style={{ fontSize: "3rem" }}>🍳</span>
+          <p>Aucune recette pour l'instant.</p>
+          <Link to="/recettes/nouvelle" className="btn-primary">+ Ajouter une recette</Link>
+        </div>
+      ) : (
+        <div className="recipe-grid">
+          {recipes.map((recipe) => (
+            <RecipeCard key={recipe.id} recipe={recipe} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
