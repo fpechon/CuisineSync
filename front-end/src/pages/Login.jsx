@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
-import Logo from "../components/Logo";
-
 function Login() {
   const { login } = useAuthStore();
   const navigate = useNavigate();
@@ -29,8 +27,7 @@ function Login() {
     <div className="login-wrapper">
       <div className="login-card">
         <div className="login-brand">
-          <Logo size={28} />
-          <h1 className="login-title">CuisineSync</h1>
+          <img src="/logo.png" alt="CuisineSync" className="login-brand-logo" />
         </div>
         <p className="login-subtitle">Votre carnet de recettes personnel</p>
 
