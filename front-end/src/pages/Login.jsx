@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
+import Logo from "../components/Logo";
 
 function Login() {
   const { login } = useAuthStore();
@@ -28,7 +29,7 @@ function Login() {
     <div className="login-wrapper">
       <div className="login-card">
         <div className="login-brand">
-          <span className="login-brand-icon">🍳</span>
+          <Logo size={28} />
           <h1 className="login-title">CuisineSync</h1>
         </div>
         <p className="login-subtitle">Votre carnet de recettes personnel</p>
