@@ -33,21 +33,21 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 
 ---
 
-## En cours — M-UX1 : Installation Tailwind + shadcn/ui + identité visuelle
+## En cours — M-UX5 : Formulaire de création + polissage final
 
-Objectif : poser les fondations visuelles sans rien casser. À la fin de ce milestone, l'app est visuellement identique (ou très proche) mais Tailwind est opérationnel, shadcn/ui est configuré, la palette Paprika et les polices sont appliquées globalement. Les prochains milestones s'appuient dessus.
+Objectif : migrer le formulaire de création et finaliser l'expérience mobile. Vérifiable en créant une recette sur mobile.
 
-- [x] #55 — Installer Tailwind CSS v4 + `@tailwindcss/vite` (plugin natif Vite)
-- [x] #56 — Installer et configurer shadcn/ui (`components.json`, `src/lib/utils.js`, deps)
-- [x] #57 — Charger Google Fonts (Cormorant Garamond + Inter) dans `index.html`
-- [x] #59 — Appliquer la palette Paprika dans `index.css` + thème Tailwind (`@theme`)
-- [x] #58 — Supprimer `App.css` (fichier legacy inutilisé du template Vite)
+- [ ] #76 — RecipeForm : titre de section avec icône, sections visuellement délimitées, erreurs back traduites en français
+- [ ] #77 — Combobox ingrédients (remplace le `<datalist>` natif) : filtrage, clavier, accessibilité
+- [ ] #78 — Validation inline au blur sur RecipeForm (avant soumission)
+- [ ] #79 — Blocage navigation si RecipeForm contient des données non soumises (`useBlocker`)
+- [ ] #80 — Audit responsive : vérification sur toutes les pages, corrections ciblées
 
 ---
 
 ## Milestones à venir
 
-### M-UX2 — Shell de l'application (Navbar, Login, 404, Spinner)
+### M-UX2 — Shell de l'application (Navbar, Login, 404, Spinner) ✅
 
 Objectif : migrer l'enveloppe de l'app (ce qui est toujours visible ou visible en premier). Vérifiable indépendamment du contenu.
 
@@ -66,13 +66,11 @@ Objectif : migrer le cœur de l'app — la navigation dans les recettes. Vérifi
 - [x] #69 — RecipeDetail : hero bandeau coloré, étapes avec cercles numérotés, ingrédients cochables (état local)
 - [x] #70 — RecipeDetail : 404 explicite (recette introuvable → page dédiée + lien retour)
 
-### M-UX4 — Flux panier & liste de courses (MealPlan, ShoppingList, Toasts)
+### M-UX4 — Flux panier & liste de courses ✅
 
-Objectif : migrer et corriger le flux principal de l'app. Vérifiable en ajoutant des recettes au panier et en générant la liste de courses.
-
-- [ ] #72 — Installer Sonner + toasts panier avec undo (RecipeCard + RecipeDetail)
-- [ ] #73 — MealPlan migré : résumé (nb recettes, temps total), CTA "Générer la liste" proéminent, dialog shadcn confirmation avant "Vider le panier"
-- [ ] #74 — ShoppingList migrée : checkboxes persistées en localStorage (reset si le panier change) + bouton "Copier la liste" (Clipboard API)
+- [x] #72 — Installer Sonner + toasts panier avec undo (RecipeCard + RecipeDetail)
+- [x] #73 — MealPlan migré : résumé (nb recettes, temps total), CTA "Générer la liste" proéminent, dialog shadcn confirmation avant "Vider le panier"
+- [x] #74 — ShoppingList migrée : checkboxes persistées en localStorage (reset si le panier change) + bouton "Copier la liste" (Clipboard API)
 
 ### M-UX5 — Formulaire de création + polissage final (RecipeForm, Combobox, mobile)
 
