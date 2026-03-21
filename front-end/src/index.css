@@ -906,7 +906,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   color: var(--color-text);
   background: transparent;
   width: 0;
-  min-width: 0;
+  min-width: 2rem;
   padding: 0;
   font-family: var(--font-body);
 }
