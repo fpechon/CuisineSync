@@ -27,7 +27,7 @@ function Login() {
     <div className="login-wrapper">
       <div className="login-card">
         <div className="login-brand">
-          <img src="/logo.png" alt="CuisineSync" className="login-brand-logo" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="CuisineSync" className="login-brand-logo" />
         </div>
         <p className="login-subtitle">Votre carnet de recettes personnel</p>
 
