@@ -34,6 +34,7 @@ function translateError(err) {
 function RecipeForm() {
   const navigate = useNavigate();
   const [units, setUnits] = useState([]);
+  const [unitsError, setUnitsError] = useState(false);
   const [ingredientNames, setIngredientNames] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -66,8 +67,10 @@ function RecipeForm() {
   }, [isDirty]);
 
   useEffect(() => {
-    fetchUnits().then(setUnits).catch(() => {});
-    fetchIngredientNames().then(setIngredientNames).catch(() => {});
+    fetchUnits().then(setUnits).catch(() => setUnitsError(true));
+    fetchIngredientNames().then(setIngredientNames).catch(() => {
+      console.error("Impossible de charger les suggestions d'ingrédients.");
+    });
   }, []);
 
   function updateField(e) {
@@ -211,6 +214,11 @@ function RecipeForm() {
 
         <section className="form-section">
           <h2 className="form-section-title">🥕 Ingrédients</h2>
+          {unitsError && (
+            <p className="form-error" style={{ marginBottom: "0.5rem" }}>
+              Impossible de charger les unités. Saisissez-les manuellement.
+            </p>
+          )}
           {errors.ingredients && (
             <p className="form-error">
               {typeof errors.ingredients === "string"
@@ -236,14 +244,23 @@ function RecipeForm() {
                 required={!!ing.name.trim()}
                 onChange={e => updateIngredient(i, "quantity", e.target.value)}
               />
-              <select
-                value={ing.unit}
-                required={!!ing.name.trim()}
-                onChange={e => updateIngredient(i, "unit", e.target.value)}
-              >
-                <option value="" disabled>Unité</option>
-                {units.map(u => <option key={u} value={u}>{u}</option>)}
-              </select>
+              {unitsError ? (
+                <input
+                  placeholder="Unité"
+                  value={ing.unit}
+                  required={!!ing.name.trim()}
+                  onChange={e => updateIngredient(i, "unit", e.target.value)}
+                />
+              ) : (
+                <select
+                  value={ing.unit}
+                  required={!!ing.name.trim()}
+                  onChange={e => updateIngredient(i, "unit", e.target.value)}
+                >
+                  <option value="" disabled>Unité</option>
+                  {units.map(u => <option key={u} value={u}>{u}</option>)}
+                </select>
+              )}
               {ingredients.length > 1 && (
                 <button type="button" className="btn-remove btn-small" onClick={() => removeIngredient(i)}>✕</button>
               )}

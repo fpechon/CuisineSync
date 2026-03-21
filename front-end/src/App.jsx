@@ -7,6 +7,7 @@ import RecipeForm from "./pages/RecipeForm";
 import MealPlan from "./pages/MealPlan";
 import ShoppingList from "./pages/ShoppingList";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BottomNav from "./components/BottomNav";
@@ -70,6 +71,7 @@ function AppRoutes() {
         <div className="route-fade" key={location.pathname}>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/" element={<ProtectedRoute><RecipeList /></ProtectedRoute>} />
             <Route path="/recettes/nouvelle" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
             <Route path="/recettes/:id" element={<ProtectedRoute><RecipeDetail /></ProtectedRoute>} />

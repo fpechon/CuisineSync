@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 function Login() {
   const { login } = useAuthStore();
@@ -59,6 +59,12 @@ function Login() {
             {loading ? "Connexion…" : "Se connecter"}
           </button>
         </form>
+        <p style={{ textAlign: "center", marginTop: "1rem", fontSize: "0.88rem", color: "var(--color-text-muted)" }}>
+          Pas encore de compte ?{" "}
+          <Link to="/register" style={{ color: "var(--color-primary)", fontWeight: 600 }}>
+            Créer un compte
+          </Link>
+        </p>
       </div>
     </div>
   );

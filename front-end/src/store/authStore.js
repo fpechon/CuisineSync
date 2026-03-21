@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { fetchMe, login as apiLogin, logout as apiLogout } from "../services/auth";
+import { fetchMe, login as apiLogin, logout as apiLogout, register as apiRegister } from "../services/auth";
 import useMealPlanStore from "./mealPlanStore";
 
 const useAuthStore = create((set) => ({
@@ -18,6 +18,14 @@ const useAuthStore = create((set) => ({
 
   login: async (username, password) => {
     const user = await apiLogin(username, password);
+    set({ user });
+    await useMealPlanStore.getState().fetchMealPlan();
+    return user;
+  },
+
+  register: async (username, password, passwordConfirm) => {
+    // Le back-end connecte l'utilisateur lors de l'inscription
+    const user = await apiRegister(username, password, passwordConfirm);
     set({ user });
     await useMealPlanStore.getState().fetchMealPlan();
     return user;
