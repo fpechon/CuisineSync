@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import Ingredient, MealPlan, Recipe, RecipeIngredient
+from .models import Ingredient, MealPlan, MealPlanRecipe, Recipe, RecipeIngredient
 
 User = get_user_model()
 
@@ -95,10 +95,13 @@ class MealPlanViewTest(APITestCase):
         )
         RecipeIngredient.objects.create(recipe=self.recipe1, ingredient=ail, quantity=1, unit="gousse(s)")
 
+    def _entry_ids(self, response):
+        return [e["recipe_id"] for e in response.data["entries"]]
+
     def test_get_empty_plan(self):
         response = self.client.get(reverse("meal-plan"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["recipe_ids"], [])
+        self.assertEqual(response.data["entries"], [])
 
     def test_get_creates_plan_if_missing(self):
         self.assertFalse(MealPlan.objects.filter(user=self.user).exists())
@@ -108,7 +111,7 @@ class MealPlanViewTest(APITestCase):
     def test_add_recipe(self):
         response = self.client.post(reverse("meal-plan-recipe", args=[self.recipe1.pk]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(self.recipe1.pk, response.data["recipe_ids"])
+        self.assertIn(self.recipe1.pk, self._entry_ids(response))
 
     def test_add_recipe_not_found(self):
         response = self.client.post(reverse("meal-plan-recipe", args=[9999]))
@@ -116,18 +119,20 @@ class MealPlanViewTest(APITestCase):
 
     def test_remove_recipe(self):
         meal_plan = MealPlan.objects.create(user=self.user)
-        meal_plan.recipes.add(self.recipe1, self.recipe2)
+        MealPlanRecipe.objects.create(meal_plan=meal_plan, recipe=self.recipe1)
+        MealPlanRecipe.objects.create(meal_plan=meal_plan, recipe=self.recipe2)
         response = self.client.delete(reverse("meal-plan-recipe", args=[self.recipe1.pk]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertNotIn(self.recipe1.pk, response.data["recipe_ids"])
-        self.assertIn(self.recipe2.pk, response.data["recipe_ids"])
+        self.assertNotIn(self.recipe1.pk, self._entry_ids(response))
+        self.assertIn(self.recipe2.pk, self._entry_ids(response))
 
     def test_clear_plan(self):
         meal_plan = MealPlan.objects.create(user=self.user)
-        meal_plan.recipes.add(self.recipe1, self.recipe2)
+        MealPlanRecipe.objects.create(meal_plan=meal_plan, recipe=self.recipe1)
+        MealPlanRecipe.objects.create(meal_plan=meal_plan, recipe=self.recipe2)
         response = self.client.delete(reverse("meal-plan"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["recipe_ids"], [])
+        self.assertEqual(response.data["entries"], [])
 
     def test_requires_auth(self):
         self.client.logout()
@@ -135,10 +140,10 @@ class MealPlanViewTest(APITestCase):
 
     def test_isolation_between_users(self):
         meal_plan = MealPlan.objects.create(user=self.user)
-        meal_plan.recipes.add(self.recipe1)
+        MealPlanRecipe.objects.create(meal_plan=meal_plan, recipe=self.recipe1)
         self.client.force_login(self.other)
         response = self.client.get(reverse("meal-plan"))
-        self.assertEqual(response.data["recipe_ids"], [])
+        self.assertEqual(response.data["entries"], [])
 
 
 class UnitListViewTest(APITestCase):
@@ -375,10 +380,10 @@ class RecipeDeleteViewTest(APITestCase):
 
     def test_delete_removes_from_meal_plans(self):
         meal_plan = MealPlan.objects.create(user=self.owner)
-        meal_plan.recipes.add(self.recipe)
+        MealPlanRecipe.objects.create(meal_plan=meal_plan, recipe=self.recipe)
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(meal_plan.recipes.filter(pk=self.recipe.pk).exists())
+        self.assertFalse(MealPlanRecipe.objects.filter(meal_plan=meal_plan, recipe=self.recipe).exists())
 
     def test_orphan_recipe_nobody_can_write(self):
         self.recipe.owner = None
@@ -389,3 +394,64 @@ class RecipeDeleteViewTest(APITestCase):
             "ingredients": [{"name": "ail", "quantity": "1", "unit": "g"}],
         }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+class MealPlanServingsTest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="servings_user", password="testpass123")
+        self.client.force_login(self.user)
+        ail = Ingredient.objects.create(name="ail_s")
+        self.recipe = Recipe.objects.create(
+            name="Recette Servings", description="", servings=4,
+            prep_time=5, cook_time=10, steps=["Étape 1"], owner=self.user,
+        )
+        RecipeIngredient.objects.create(recipe=self.recipe, ingredient=ail, quantity=2, unit="gousse(s)")
+        self.add_url = reverse("meal-plan-recipe", args=[self.recipe.pk])
+
+    def test_response_shape(self):
+        response = self.client.get(reverse("meal-plan"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("entries", response.data)
+        self.assertIsInstance(response.data["entries"], list)
+
+    def test_add_recipe_default_servings(self):
+        response = self.client.post(self.add_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        entry = response.data["entries"][0]
+        self.assertEqual(entry["recipe_id"], self.recipe.pk)
+        self.assertEqual(entry["servings"], self.recipe.servings)
+        self.assertEqual(entry["recipe_base_servings"], self.recipe.servings)
+
+    def test_add_recipe_custom_servings(self):
+        response = self.client.post(self.add_url, {"servings": 6}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["entries"][0]["servings"], 6)
+
+    def test_add_recipe_servings_min_validation(self):
+        response = self.client.post(self.add_url, {"servings": 0}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_add_idempotent_no_overwrite(self):
+        self.client.post(self.add_url, {"servings": 6}, format="json")
+        # Re-POST sans servings → ne doit pas écraser
+        response = self.client.post(self.add_url)
+        self.assertEqual(response.data["entries"][0]["servings"], 6)
+
+    def test_add_idempotent_with_servings_overwrites(self):
+        self.client.post(self.add_url, {"servings": 6}, format="json")
+        response = self.client.post(self.add_url, {"servings": 8}, format="json")
+        self.assertEqual(response.data["entries"][0]["servings"], 8)
+
+    def test_patch_servings(self):
+        self.client.post(self.add_url)
+        response = self.client.patch(self.add_url, {"servings": 8}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["entries"][0]["servings"], 8)
+
+    def test_patch_recipe_not_in_plan(self):
+        response = self.client.patch(self.add_url, {"servings": 8}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_patch_servings_invalid(self):
+        self.client.post(self.add_url)
+        response = self.client.patch(self.add_url, {"servings": 0}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

@@ -5,55 +5,101 @@ import {
   clearMealPlan,
   getMealPlan,
   removeRecipeFromMealPlan,
+  updateRecipeServings,
 } from "../services/mealPlan";
+
+function entriesToServingsMap(entries) {
+  const map = {};
+  for (const entry of entries) {
+    map[entry.recipe_id] = entry.servings ?? 1;
+  }
+  return map;
+}
+
+function servingsMapToSelectedIds(servingsMap) {
+  return Object.keys(servingsMap).map(Number);
+}
+
+function applyEntries(entries) {
+  const servingsMap = entriesToServingsMap(entries);
+  return { entries, servingsMap, selectedIds: servingsMapToSelectedIds(servingsMap) };
+}
 
 const useMealPlanStore = create((set, get) => ({
   selectedIds: [],
+  servingsMap: {},
+  entries: [],
 
   fetchMealPlan: async () => {
-    const data = await getMealPlan();
-    set({ selectedIds: data.recipe_ids });
+    const { entries } = await getMealPlan();
+    set(applyEntries(entries));
   },
 
-  addRecipe: async (id) => {
-    const previous = get().selectedIds;
-    set((state) => ({ selectedIds: [...new Set([...state.selectedIds, id])] }));
+  addRecipe: async (id, servings = 1) => {
+    const previous = { servingsMap: get().servingsMap, selectedIds: get().selectedIds, entries: get().entries };
+    const newServingsMap = { ...previous.servingsMap, [id]: servings };
+    // Optimistic: update servingsMap/selectedIds but not entries (no recipe_name known yet)
+    set({ servingsMap: newServingsMap, selectedIds: servingsMapToSelectedIds(newServingsMap) });
     try {
-      const data = await addRecipeToMealPlan(id);
-      set({ selectedIds: data.recipe_ids });
+      const { entries } = await addRecipeToMealPlan(id, servings);
+      set(applyEntries(entries));
     } catch {
-      set({ selectedIds: previous });
+      set(previous);
       toast.error("Impossible d'ajouter la recette au panier");
     }
   },
 
   removeRecipe: async (id) => {
-    const previous = get().selectedIds;
-    set((state) => ({ selectedIds: state.selectedIds.filter((r) => r !== id) }));
+    const previous = { servingsMap: get().servingsMap, selectedIds: get().selectedIds, entries: get().entries };
+    const newServingsMap = { ...previous.servingsMap };
+    delete newServingsMap[id];
+    set({
+      servingsMap: newServingsMap,
+      selectedIds: servingsMapToSelectedIds(newServingsMap),
+      entries: previous.entries.filter((e) => e.recipe_id !== id),
+    });
     try {
-      const data = await removeRecipeFromMealPlan(id);
-      set({ selectedIds: data.recipe_ids });
+      const { entries } = await removeRecipeFromMealPlan(id);
+      set(applyEntries(entries));
     } catch {
-      set({ selectedIds: previous });
+      set(previous);
       toast.error("Impossible de retirer la recette du panier");
     }
   },
 
-  clear: async () => {
-    const previous = get().selectedIds;
-    set({ selectedIds: [] });
+  updateServings: async (id, servings) => {
+    const previous = { servingsMap: get().servingsMap, selectedIds: get().selectedIds, entries: get().entries };
+    const newServingsMap = { ...previous.servingsMap, [id]: servings };
+    const newEntries = previous.entries.map((e) =>
+      e.recipe_id === id ? { ...e, servings } : e
+    );
+    set({ servingsMap: newServingsMap, selectedIds: servingsMapToSelectedIds(newServingsMap), entries: newEntries });
     try {
-      const data = await clearMealPlan();
-      set({ selectedIds: data.recipe_ids });
+      const { entries } = await updateRecipeServings(id, servings);
+      set(applyEntries(entries));
     } catch {
-      set({ selectedIds: previous });
+      set(previous);
+      toast.error("Impossible de mettre à jour les couverts");
+    }
+  },
+
+  clear: async () => {
+    const previous = { servingsMap: get().servingsMap, selectedIds: get().selectedIds, entries: get().entries };
+    set({ servingsMap: {}, selectedIds: [], entries: [] });
+    try {
+      const { entries } = await clearMealPlan();
+      set(applyEntries(entries));
+    } catch {
+      set(previous);
       toast.error("Impossible de vider le panier");
     }
   },
 
   isSelected: (id) => get().selectedIds.includes(id),
 
-  resetStore: () => set({ selectedIds: [] }),
+  getServings: (id) => get().servingsMap[id] ?? 1,
+
+  resetStore: () => set({ selectedIds: [], servingsMap: {}, entries: [] }),
 }));
 
 export default useMealPlanStore;

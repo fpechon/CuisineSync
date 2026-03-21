@@ -49,11 +49,24 @@ class RecipeIngredient(models.Model):
         return f"{self.quantity} {self.unit} {self.ingredient.name}"
 
 
+class MealPlanRecipe(models.Model):
+    meal_plan = models.ForeignKey('MealPlan', on_delete=models.CASCADE, related_name="meal_plan_recipes")
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="meal_plan_recipes")
+    servings = models.PositiveSmallIntegerField(default=1)
+
+    class Meta:
+        ordering = ["recipe__name"]
+        unique_together = [("meal_plan", "recipe")]
+
+    def __str__(self):
+        return f"{self.recipe.name} x{self.servings}"
+
+
 class MealPlan(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="meal_plan"
     )
-    recipes = models.ManyToManyField(Recipe, blank=True, related_name="meal_plans")
+    recipes = models.ManyToManyField(Recipe, through="MealPlanRecipe", blank=True, related_name="meal_plans")
 
     class Meta:
         ordering = ["user__username"]
