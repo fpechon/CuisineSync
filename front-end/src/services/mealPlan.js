@@ -9,7 +9,7 @@ export async function addRecipeToMealPlan(id, servings) {
   const body = servings !== undefined ? { servings } : undefined;
   const data = await apiFetch(`/meal-plan/recipes/${id}/`, {
     method: "POST",
-    ...(body ? { body: JSON.stringify(body) } : {}),
+    ...(body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}),
   });
   return { entries: data.entries ?? [] };
 }
@@ -27,6 +27,7 @@ export async function clearMealPlan() {
 export async function updateRecipeServings(id, servings) {
   const data = await apiFetch(`/meal-plan/recipes/${id}/`, {
     method: "PATCH",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ servings }),
   });
   return { entries: data.entries ?? [] };
