@@ -555,6 +555,33 @@ a { color: inherit; text-decoration: none; }
   margin-top: 0.25rem;
 }
 
+.recipe-hero-actions .btn-secondary,
+.recipe-hero-actions .btn-danger {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius);
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+}
+
+.recipe-hero-actions .btn-secondary {
+  background: rgba(255, 255, 255, 0.15);
+}
+.recipe-hero-actions .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.recipe-hero-actions .btn-danger {
+  background: rgba(192, 57, 43, 0.85);
+}
+.recipe-hero-actions .btn-danger:hover {
+  background: rgba(169, 50, 37, 0.95);
+}
+
 .recipe-hero-meta {
   display: flex;
   flex-wrap: wrap;
