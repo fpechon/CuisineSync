@@ -124,15 +124,18 @@ function ShoppingList() {
               const isChecked = !!checked[key];
               const qty = Number.isInteger(ing.quantity) ? ing.quantity : ing.quantity.toFixed(1);
               return (
-                <li
-                  key={key}
-                  className={`shopping-item ${isChecked ? "checked" : ""}`}
-                  onClick={() => toggleItem(key)}
-                >
-                  <span className="shopping-checkbox">{isChecked ? "✓" : ""}</span>
-                  <span className="shopping-item-text">
-                    <strong>{qty} {ing.unit}</strong> {ing.name}
-                  </span>
+                <li key={key} className={`shopping-item ${isChecked ? "checked" : ""}`}>
+                  <label className="shopping-label">
+                    <input
+                      type="checkbox"
+                      className="shopping-checkbox"
+                      checked={isChecked}
+                      onChange={() => toggleItem(key)}
+                    />
+                    <span className="shopping-item-text">
+                      <strong>{qty} {ing.unit}</strong> {ing.name}
+                    </span>
+                  </label>
                 </li>
               );
             })}

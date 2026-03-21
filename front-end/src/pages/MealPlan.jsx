@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useMealPlanStore from "../store/mealPlanStore";
 import { fetchRecipe } from "../services/recipes";
+import { getRecipeColor } from "../lib/recipeColor";
 import {
   Dialog,
   DialogContent,
@@ -10,16 +11,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "../components/ui/dialog";
-
-const CARD_COLORS = [
-  "#C4451A", "#8B5E3C", "#2D6A4F",
-  "#A33815", "#5C7A3E", "#6B4E2A",
-];
-
-function getCardColor(name) {
-  const hash = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  return CARD_COLORS[hash % CARD_COLORS.length];
-}
 
 function MealPlan() {
   const { selectedIds, removeRecipe, clear } = useMealPlanStore();
@@ -91,7 +82,7 @@ function MealPlan() {
 
           <ul className="meal-plan-list">
             {recipes.map((recipe) => {
-              const color = getCardColor(recipe.name);
+              const color = getRecipeColor(recipe.name);
               return (
                 <li key={recipe.id} className="meal-plan-item">
                   <span className="meal-plan-color-dot" style={{ background: color }} />

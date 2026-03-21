@@ -33,15 +33,28 @@ Source de vérité pour le suivi opérationnel. Mis à jour à chaque session.
 
 ---
 
-## En cours — M-UX5 : Formulaire de création + polissage final
+## M-UX5 — Formulaire de création + polissage final ✅
 
 Objectif : migrer le formulaire de création et finaliser l'expérience mobile. Vérifiable en créant une recette sur mobile.
 
-- [ ] #76 — RecipeForm : titre de section avec icône, sections visuellement délimitées, erreurs back traduites en français
-- [ ] #77 — Combobox ingrédients (remplace le `<datalist>` natif) : filtrage, clavier, accessibilité
-- [ ] #78 — Validation inline au blur sur RecipeForm (avant soumission)
-- [ ] #79 — Blocage navigation si RecipeForm contient des données non soumises (`useBlocker`)
-- [ ] #80 — Audit responsive : vérification sur toutes les pages, corrections ciblées
+- [x] #76 — RecipeForm : titre de section avec icône, sections visuellement délimitées, erreurs back traduites en français
+- [x] #77 — Combobox ingrédients (remplace le `<datalist>` natif) : filtrage, clavier, accessibilité
+- [x] #78 — Validation inline au blur sur RecipeForm (avant soumission)
+- [x] #79 — Blocage navigation si RecipeForm contient des données non soumises (beforeunload + dialog)
+- [x] #80 — Audit responsive : vérification sur toutes les pages, corrections ciblées
+
+---
+
+## En cours — Audit UX & polish technique
+
+Audit front-end complet. Corrections de robustesse, accessibilité, et UX mobile.
+
+- [x] #82 — Extraire `recipeColor.js`, supprimer dead code (command.jsx, popover.jsx, cmdk), dédupliquer CSS
+- [x] #83 — Centraliser `apiFetch` avec CSRF et gestion d'erreurs (src/services/api.js)
+- [x] #84 — Rollback optimistic updates si l'API mealPlanStore échoue + toast d'erreur
+- [x] #85 — Vrais `<input type="checkbox">` dans RecipeDetail (ingrédients) et ShoppingList (accessibilité clavier/lecteur d'écran)
+- [x] #86 — Empty states pour ingrédients/étapes vides dans RecipeDetail + fix setErrors({}) dans RecipeForm
+- [x] #87 — FAB sticky panier sur mobile dans RecipeDetail + transition fade entre routes
 
 ---
 

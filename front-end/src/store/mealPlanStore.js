@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { toast } from "sonner";
 import {
   addRecipeToMealPlan,
   clearMealPlan,
@@ -15,21 +16,39 @@ const useMealPlanStore = create((set, get) => ({
   },
 
   addRecipe: async (id) => {
+    const previous = get().selectedIds;
     set((state) => ({ selectedIds: [...new Set([...state.selectedIds, id])] }));
-    const data = await addRecipeToMealPlan(id);
-    set({ selectedIds: data.recipe_ids });
+    try {
+      const data = await addRecipeToMealPlan(id);
+      set({ selectedIds: data.recipe_ids });
+    } catch {
+      set({ selectedIds: previous });
+      toast.error("Impossible d'ajouter la recette au panier");
+    }
   },
 
   removeRecipe: async (id) => {
+    const previous = get().selectedIds;
     set((state) => ({ selectedIds: state.selectedIds.filter((r) => r !== id) }));
-    const data = await removeRecipeFromMealPlan(id);
-    set({ selectedIds: data.recipe_ids });
+    try {
+      const data = await removeRecipeFromMealPlan(id);
+      set({ selectedIds: data.recipe_ids });
+    } catch {
+      set({ selectedIds: previous });
+      toast.error("Impossible de retirer la recette du panier");
+    }
   },
 
   clear: async () => {
+    const previous = get().selectedIds;
     set({ selectedIds: [] });
-    const data = await clearMealPlan();
-    set({ selectedIds: data.recipe_ids });
+    try {
+      const data = await clearMealPlan();
+      set({ selectedIds: data.recipe_ids });
+    } catch {
+      set({ selectedIds: previous });
+      toast.error("Impossible de vider le panier");
+    }
   },
 
   isSelected: (id) => get().selectedIds.includes(id),

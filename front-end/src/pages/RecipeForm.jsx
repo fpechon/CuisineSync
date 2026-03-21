@@ -106,7 +106,6 @@ function RecipeForm() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setErrors({});
     setSubmitting(true);
     try {
       const recipe = await createRecipe({

@@ -3,16 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
 import useMealPlanStore from "../store/mealPlanStore";
 import { fetchRecipe } from "../services/recipes";
-
-const CARD_COLORS = [
-  "#C4451A", "#8B5E3C", "#2D6A4F",
-  "#A33815", "#5C7A3E", "#6B4E2A",
-];
-
-function getCardColor(name) {
-  const hash = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  return CARD_COLORS[hash % CARD_COLORS.length];
-}
+import { getRecipeColor } from "../lib/recipeColor";
 
 function formatQty(qty) {
   const n = Number(qty);
@@ -72,7 +63,7 @@ function RecipeDetail() {
   );
 
   const selected = isSelected(recipe.id);
-  const color = getCardColor(recipe.name);
+  const color = getRecipeColor(recipe.name);
   const totalTime = recipe.prep_time + recipe.cook_time;
 
   function handleToggle() {
@@ -106,44 +97,60 @@ function RecipeDetail() {
       )}
 
       <button
-        className={`btn-toggle ${selected ? "btn-remove" : "btn-add"}`}
+        className={`btn-toggle recipe-detail-basket-desktop ${selected ? "btn-remove" : "btn-add"}`}
         onClick={handleToggle}
         style={{ alignSelf: "flex-start" }}
       >
         {selected ? "✓ Dans le panier — retirer" : "Ajouter au panier"}
       </button>
 
+      {/* FAB mobile — visible uniquement sur mobile (≤768px via CSS) */}
+      <button
+        className={`recipe-fab ${selected ? "btn-remove" : "btn-add"}`}
+        onClick={handleToggle}
+        aria-label={selected ? "Retirer du panier" : "Ajouter au panier"}
+      >
+        {selected ? "✓ Dans le panier" : "+ Panier"}
+      </button>
+
       <div className="recipe-detail-body">
         <section className="recipe-ingredients">
           <h2>Ingrédients</h2>
-          <ul>
-            {recipe.ingredients.map((ing) => (
-              <li
-                key={ing.id}
-                className={`recipe-ingredient-item ${checkedIngredients.has(ing.id) ? "checked" : ""}`}
-                onClick={() => toggleIngredient(ing.id)}
-              >
-                <span className="ingredient-checkbox">
-                  {checkedIngredients.has(ing.id) ? "✓" : ""}
-                </span>
-                <span>
-                  <strong>{formatQty(ing.quantity)} {ing.unit}</strong> {ing.name}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {recipe.ingredients.length === 0 ? (
+            <p className="empty-section">Aucun ingrédient renseigné.</p>
+          ) : (
+            <ul>
+              {recipe.ingredients.map((ing) => (
+                <li key={ing.id} className="recipe-ingredient-item">
+                  <label className={`ingredient-label ${checkedIngredients.has(ing.id) ? "checked" : ""}`}>
+                    <input
+                      type="checkbox"
+                      className="ingredient-checkbox"
+                      checked={checkedIngredients.has(ing.id)}
+                      onChange={() => toggleIngredient(ing.id)}
+                    />
+                    <strong>{formatQty(ing.quantity)} {ing.unit}</strong> {ing.name}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="recipe-steps">
           <h2>Préparation</h2>
-          <ol className="recipe-steps-list">
-            {recipe.steps.map((step, i) => (
-              <li key={i} className="recipe-step-item">
-                <span className="step-circle" style={{ background: color }}>{i + 1}</span>
-                <p>{step}</p>
-              </li>
-            ))}
-          </ol>
+          {recipe.steps.length === 0 ? (
+            <p className="empty-section">Aucune étape renseignée.</p>
+          ) : (
+            <ol className="recipe-steps-list">
+              {recipe.steps.map((step, i) => (
+                <li key={i} className="recipe-step-item">
+                  <span className="step-circle" style={{ background: color }} aria-hidden="true">{i + 1}</span>
+                  <p>{step}</p>
+                </li>
+              ))}
+            </ol>
+          )}
         </section>
       </div>
     </div>
