@@ -461,6 +461,7 @@ a { color: inherit; text-decoration: none; }
 
 .recipe-card-body {
   padding: 1rem 1.25rem 0.75rem;
+  flex: 1;
 }
 
 .recipe-card-title {
@@ -1033,5 +1034,10 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   /* Hide the desktop basket button on mobile */
   .recipe-detail-basket-desktop {
     display: none;
+  }
+
+  /* Sonner toasts — décaler au-dessus de la BottomNav */
+  [data-sonner-toaster][data-y-position="bottom"] {
+    bottom: 70px !important;
   }
 }
