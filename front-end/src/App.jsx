@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BottomNav from "./components/BottomNav";
+import Logo from "./components/Logo";
 import useMealPlanStore from "./store/mealPlanStore";
 import useAuthStore from "./store/authStore";
 
@@ -26,7 +27,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <NavLink to="/" className="navbar-brand">
-        <span className="navbar-brand-icon">🍳</span>
+        <Logo size={22} />
         CuisineSync
       </NavLink>
 
