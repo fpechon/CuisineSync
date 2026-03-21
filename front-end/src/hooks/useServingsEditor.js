@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import useMealPlanStore from "../store/mealPlanStore";
 
 function useServingsEditor(recipeId) {
-  const getServings = useMealPlanStore((state) => state.getServings);
+  const storeValue = useMealPlanStore((state) => state.servingsMap[recipeId] ?? 1);
   const updateServings = useMealPlanStore((state) => state.updateServings);
-  const storeValue = getServings(recipeId);
 
   const [localValue, setLocalValue] = useState(storeValue);
   const timeoutRef = useRef(null);
