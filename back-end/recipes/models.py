@@ -20,6 +20,13 @@ class Recipe(models.Model):
     cook_time = models.PositiveSmallIntegerField(help_text="En minutes")
     steps = models.JSONField(default=list, help_text="Liste ordonnée des étapes de préparation")
     created_at = models.DateTimeField(auto_now_add=True)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="recipes",
+    )
 
     class Meta:
         ordering = ["name"]

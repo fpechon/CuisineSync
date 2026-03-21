@@ -74,6 +74,7 @@ function AppRoutes() {
             <Route path="/register" element={<Register />} />
             <Route path="/" element={<ProtectedRoute><RecipeList /></ProtectedRoute>} />
             <Route path="/recettes/nouvelle" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
+            <Route path="/recettes/:id/modifier" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
             <Route path="/recettes/:id" element={<ProtectedRoute><RecipeDetail /></ProtectedRoute>} />
             <Route path="/panier" element={<ProtectedRoute><MealPlan /></ProtectedRoute>} />
             <Route path="/liste-de-courses" element={<ProtectedRoute><ShoppingList /></ProtectedRoute>} />

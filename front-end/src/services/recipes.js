@@ -20,3 +20,15 @@ export async function createRecipe(data) {
     body: JSON.stringify(data),
   });
 }
+
+export async function updateRecipe(id, data) {
+  return apiFetch(`/recipes/${id}/`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteRecipe(id) {
+  return apiFetch(`/recipes/${id}/`, { method: "DELETE" });
+}
