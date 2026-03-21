@@ -1,5 +1,5 @@
-from rest_framework import status
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -8,18 +8,23 @@ from .serializers import RecipeCreateSerializer, RecipeDetailSerializer, RecipeL
 from .units import UNITS
 
 
-class RecipeListView(ListAPIView):
+class RecipeListView(generics.ListCreateAPIView):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeListSerializer
+    permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        serializer = RecipeCreateSerializer(data=request.data)
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return RecipeCreateSerializer
+        return RecipeListSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         recipe = serializer.save()
         return Response(RecipeDetailSerializer(recipe).data, status=status.HTTP_201_CREATED)
 
 
-class RecipeDetailView(RetrieveAPIView):
+class RecipeDetailView(generics.RetrieveAPIView):
     queryset = Recipe.objects.prefetch_related("recipe_ingredients__ingredient")
     serializer_class = RecipeDetailSerializer
 
