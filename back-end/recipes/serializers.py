@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 
 from .models import Ingredient, Recipe, RecipeIngredient
@@ -48,6 +49,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def validate_ingredients(self, value):
         if not value:
             raise serializers.ValidationError("La recette doit avoir au moins un ingrédient.")
+        names = [i["name"].strip().lower() for i in value]
+        if len(names) != len(set(names)):
+            raise serializers.ValidationError("La recette contient des ingrédients en double.")
         return value
 
     def validate_steps(self, value):
@@ -55,15 +59,16 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("La recette doit avoir au moins une étape.")
         return value
 
+    @transaction.atomic
     def create(self, validated_data):
         ingredients_data = validated_data.pop("ingredients")
         recipe = Recipe.objects.create(**validated_data)
         for ing in ingredients_data:
             name = ing["name"].strip()
-            try:
-                ingredient = Ingredient.objects.get(name__iexact=name)
-            except Ingredient.DoesNotExist:
-                ingredient = Ingredient.objects.create(name=name)
+            ingredient, _ = Ingredient.objects.get_or_create(
+                name__iexact=name,
+                defaults={"name": name},
+            )
             RecipeIngredient.objects.create(
                 recipe=recipe,
                 ingredient=ingredient,

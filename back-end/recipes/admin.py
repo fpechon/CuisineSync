@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Ingredient, Recipe, RecipeIngredient
+from .models import Ingredient, MealPlan, Recipe, RecipeIngredient
 
 
 class RecipeIngredientInline(admin.TabularInline):
@@ -22,4 +22,10 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ["name"]
 
 
-admin.site.register(RecipeIngredient)
+@admin.register(MealPlan)
+class MealPlanAdmin(admin.ModelAdmin):
+    list_display = ["user", "recipe_count"]
+
+    def recipe_count(self, obj):
+        return obj.recipes.count()
+    recipe_count.short_description = "Nombre de recettes"
