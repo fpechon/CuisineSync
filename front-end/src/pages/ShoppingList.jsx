@@ -95,9 +95,13 @@ function ShoppingList() {
       const check = checked[key] ? "✓" : "☐";
       return `${check} ${qty} ${ing.unit} ${ing.name}`;
     }).join("\n");
-    navigator.clipboard.writeText(header + lines).then(() => {
-      toast.success("Liste copiée dans le presse-papier !");
-    });
+    if (!navigator.clipboard) {
+      toast.error("Copie non disponible (nécessite HTTPS).");
+      return;
+    }
+    navigator.clipboard.writeText(header + lines)
+      .then(() => toast.success("Liste copiée dans le presse-papier !"))
+      .catch(() => toast.error("Impossible de copier la liste."));
   }
 
   return (
