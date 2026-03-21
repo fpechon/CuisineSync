@@ -31,6 +31,7 @@ jobs:
         working-directory: back-end
 
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       DJANGO_SETTINGS_MODULE: config.settings.local
       SECRET_KEY: ci-secret-key-not-used-in-production
       POSTGRES_DB: test
@@ -49,6 +50,9 @@ jobs:
 
       - name: Installer les dépendances Python
         run: uv sync --frozen
+
+      - name: Créer le dossier staticfiles
+        run: mkdir -p staticfiles
 
       - name: Lancer les tests Django
         run: uv run python manage.py test --verbosity=2
