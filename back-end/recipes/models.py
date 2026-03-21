@@ -48,5 +48,8 @@ class MealPlan(models.Model):
     )
     recipes = models.ManyToManyField(Recipe, blank=True, related_name="meal_plans")
 
+    class Meta:
+        ordering = ["user__username"]
+
     def __str__(self):
         return f"Panier de {self.user}"
