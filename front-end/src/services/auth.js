@@ -1,36 +1,26 @@
-const API = import.meta.env.VITE_API_URL;
-
-function getCsrfToken() {
-  const match = document.cookie.match(/csrftoken=([^;]+)/);
-  return match ? match[1] : null;
-}
+import { apiFetch } from "./api";
 
 export async function fetchMe() {
-  const response = await fetch(`${API}/auth/me/`, { credentials: "include" });
-  if (response.status === 401) return null;
-  if (!response.ok) throw new Error("Erreur réseau");
-  return response.json();
+  try {
+    return await apiFetch("/auth/me/");
+  } catch (err) {
+    if (err?._status === 401) return null;
+    throw new Error("Erreur réseau");
+  }
 }
 
 export async function login(username, password) {
-  const response = await fetch(`${API}/auth/login/`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": getCsrfToken() ?? "",
-    },
-    body: JSON.stringify({ username, password }),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error?.message ?? "Erreur de connexion");
-  return data;
+  try {
+    return await apiFetch("/auth/login/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+  } catch (err) {
+    throw new Error(err?.error?.message ?? "Erreur de connexion");
+  }
 }
 
 export async function logout() {
-  await fetch(`${API}/auth/logout/`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "X-CSRFToken": getCsrfToken() ?? "" },
-  });
+  await apiFetch("/auth/logout/", { method: "POST" });
 }

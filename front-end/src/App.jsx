@@ -56,7 +56,6 @@ function AppRoutes() {
   const { init } = useAuthStore();
   const { user } = useAuthStore();
   const location = useLocation();
-  const isLoginPage = location.pathname === "/login";
 
   useEffect(() => {
     init();
@@ -67,17 +66,19 @@ function AppRoutes() {
       <Toaster position="bottom-center" richColors closeButton />
       <Navbar />
       <main className="main-content">
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<ProtectedRoute><RecipeList /></ProtectedRoute>} />
-          <Route path="/recettes/nouvelle" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
-          <Route path="/recettes/:id" element={<ProtectedRoute><RecipeDetail /></ProtectedRoute>} />
-          <Route path="/panier" element={<ProtectedRoute><MealPlan /></ProtectedRoute>} />
-          <Route path="/liste-de-courses" element={<ProtectedRoute><ShoppingList /></ProtectedRoute>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="route-fade" key={location.pathname}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<ProtectedRoute><RecipeList /></ProtectedRoute>} />
+            <Route path="/recettes/nouvelle" element={<ProtectedRoute><RecipeForm /></ProtectedRoute>} />
+            <Route path="/recettes/:id" element={<ProtectedRoute><RecipeDetail /></ProtectedRoute>} />
+            <Route path="/panier" element={<ProtectedRoute><MealPlan /></ProtectedRoute>} />
+            <Route path="/liste-de-courses" element={<ProtectedRoute><ShoppingList /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
       </main>
-      {user && !isLoginPage && <BottomNav />}
+      {user && location.pathname !== "/login" && <BottomNav />}
     </>
   );
 }
