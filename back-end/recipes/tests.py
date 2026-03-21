@@ -20,6 +20,7 @@ class RecipeListViewTest(APITestCase):
             prep_time=10,
             cook_time=20,
             steps=["Étape 1", "Étape 2"],
+            owner=self.user,
         )
         RecipeIngredient.objects.create(recipe=self.recipe, ingredient=ail, quantity=2, unit="gousse(s)")
 
@@ -54,6 +55,7 @@ class RecipeDetailViewTest(APITestCase):
             prep_time=10,
             cook_time=20,
             steps=["Étape 1", "Étape 2"],
+            owner=self.user,
         )
         RecipeIngredient.objects.create(recipe=self.recipe, ingredient=self.ail, quantity=3, unit="gousse(s)")
 
@@ -86,10 +88,10 @@ class MealPlanViewTest(APITestCase):
         self.client.force_login(self.user)
         ail = Ingredient.objects.create(name="ail")
         self.recipe1 = Recipe.objects.create(
-            name="Recette 1", description="", servings=2, prep_time=5, cook_time=10, steps=[]
+            name="Recette 1", description="", servings=2, prep_time=5, cook_time=10, steps=[], owner=self.user,
         )
         self.recipe2 = Recipe.objects.create(
-            name="Recette 2", description="", servings=4, prep_time=15, cook_time=30, steps=[]
+            name="Recette 2", description="", servings=4, prep_time=15, cook_time=30, steps=[], owner=self.user,
         )
         RecipeIngredient.objects.create(recipe=self.recipe1, ingredient=ail, quantity=1, unit="gousse(s)")
 
@@ -242,4 +244,148 @@ class RecipeCreateViewTest(APITestCase):
     def test_requires_auth(self):
         self.client.logout()
         response = self.client.post(self.url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create_assigns_owner(self):
+        response = self.client.post(self.url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(response.data["is_owner"])
+        self.assertEqual(response.data["owner_username"], self.user.username)
+
+
+class RecipeIsOwnerFieldTest(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username="owner", password="testpass123")
+        self.other = User.objects.create_user(username="other", password="testpass123")
+        ail = Ingredient.objects.create(name="ail")
+        self.recipe = Recipe.objects.create(
+            name="Recette", description="", servings=2, prep_time=5, cook_time=10,
+            steps=["Étape 1"], owner=self.owner,
+        )
+        RecipeIngredient.objects.create(recipe=self.recipe, ingredient=ail, quantity=1, unit="g")
+
+    def test_list_is_owner_true_for_owner(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("recipe-list"))
+        self.assertTrue(response.data[0]["is_owner"])
+
+    def test_list_is_owner_false_for_other(self):
+        self.client.force_login(self.other)
+        response = self.client.get(reverse("recipe-list"))
+        self.assertFalse(response.data[0]["is_owner"])
+
+    def test_detail_is_owner_true_for_owner(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("recipe-detail", args=[self.recipe.pk]))
+        self.assertTrue(response.data["is_owner"])
+
+    def test_detail_is_owner_false_for_other(self):
+        self.client.force_login(self.other)
+        response = self.client.get(reverse("recipe-detail", args=[self.recipe.pk]))
+        self.assertFalse(response.data["is_owner"])
+
+
+class RecipeUpdateViewTest(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username="owner", password="testpass123")
+        self.other = User.objects.create_user(username="other", password="testpass123")
+        self.client.force_login(self.owner)
+        ail = Ingredient.objects.create(name="ail")
+        self.recipe = Recipe.objects.create(
+            name="Recette originale", description="", servings=2, prep_time=5, cook_time=10,
+            steps=["Étape 1"], owner=self.owner,
+        )
+        RecipeIngredient.objects.create(recipe=self.recipe, ingredient=ail, quantity=1, unit="g")
+        self.url = reverse("recipe-detail", args=[self.recipe.pk])
+        self.valid_payload = {
+            "name": "Recette modifiée",
+            "description": "Nouvelle description.",
+            "servings": 4,
+            "prep_time": 10,
+            "cook_time": 20,
+            "steps": ["Étape A", "Étape B"],
+            "ingredients": [{"name": "ail", "quantity": "2", "unit": "gousse(s)"}],
+        }
+
+    def test_owner_can_put(self):
+        response = self.client.put(self.url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["name"], "Recette modifiée")
+        self.assertTrue(response.data["is_owner"])
+
+    def test_owner_can_patch(self):
+        response = self.client.patch(self.url, {"name": "Nouveau nom"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["name"], "Nouveau nom")
+
+    def test_patch_without_ingredients_preserves_existing(self):
+        response = self.client.patch(self.url, {"name": "Patch sans ingrédients"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["ingredients"]), 1)
+
+    def test_non_owner_put_returns_403(self):
+        self.client.force_login(self.other)
+        response = self.client.put(self.url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_non_owner_patch_returns_403(self):
+        self.client.force_login(self.other)
+        response = self.client.patch(self.url, {"name": "Hack"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthenticated_put_returns_403(self):
+        self.client.logout()
+        response = self.client.put(self.url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_invalid_payload_returns_400(self):
+        payload = {**self.valid_payload, "ingredients": []}
+        response = self.client.put(self.url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class RecipeDeleteViewTest(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username="owner", password="testpass123")
+        self.other = User.objects.create_user(username="other", password="testpass123")
+        self.client.force_login(self.owner)
+        ail = Ingredient.objects.create(name="ail")
+        self.recipe = Recipe.objects.create(
+            name="Recette à supprimer", description="", servings=2, prep_time=5, cook_time=10,
+            steps=["Étape 1"], owner=self.owner,
+        )
+        RecipeIngredient.objects.create(recipe=self.recipe, ingredient=ail, quantity=1, unit="g")
+        self.url = reverse("recipe-detail", args=[self.recipe.pk])
+
+    def test_owner_can_delete(self):
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Recipe.objects.filter(pk=self.recipe.pk).exists())
+
+    def test_non_owner_delete_returns_403(self):
+        self.client.force_login(self.other)
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(Recipe.objects.filter(pk=self.recipe.pk).exists())
+
+    def test_unauthenticated_delete_returns_403(self):
+        self.client.logout()
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_removes_from_meal_plans(self):
+        meal_plan = MealPlan.objects.create(user=self.owner)
+        meal_plan.recipes.add(self.recipe)
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(meal_plan.recipes.filter(pk=self.recipe.pk).exists())
+
+    def test_orphan_recipe_nobody_can_write(self):
+        self.recipe.owner = None
+        self.recipe.save()
+        response = self.client.put(self.url, {
+            "name": "X", "description": "", "servings": 1,
+            "prep_time": 1, "cook_time": 1, "steps": ["X"],
+            "ingredients": [{"name": "ail", "quantity": "1", "unit": "g"}],
+        }, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

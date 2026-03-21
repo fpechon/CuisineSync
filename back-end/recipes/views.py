@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Ingredient, MealPlan, Recipe
+from .permissions import IsOwnerOrReadOnly
 from .serializers import RecipeCreateSerializer, RecipeDetailSerializer, RecipeListSerializer
 from .units import UNITS
 
@@ -17,16 +18,35 @@ class RecipeListView(generics.ListCreateAPIView):
             return RecipeCreateSerializer
         return RecipeListSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        recipe = serializer.save()
-        return Response(RecipeDetailSerializer(recipe).data, status=status.HTTP_201_CREATED)
+        recipe = serializer.save(owner=request.user)
+        return Response(
+            RecipeDetailSerializer(recipe, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
-class RecipeDetailView(generics.RetrieveAPIView):
+class RecipeDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Recipe.objects.prefetch_related("recipe_ingredients__ingredient")
-    serializer_class = RecipeDetailSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.request.method in ("PUT", "PATCH"):
+            return RecipeCreateSerializer
+        return RecipeDetailSerializer
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        recipe = serializer.save()
+        return Response(RecipeDetailSerializer(recipe, context={"request": request}).data)
 
 
 class UnitListView(APIView):

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createRecipe } from "../services/recipes";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
+import { createRecipe, fetchRecipe, updateRecipe } from "../services/recipes";
 import { fetchIngredientNames, fetchUnits } from "../services/units";
 import IngredientCombobox from "../components/IngredientCombobox";
 import StepperInput from "../components/StepperInput";
@@ -32,11 +33,15 @@ function translateError(err) {
 }
 
 function RecipeForm() {
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
   const navigate = useNavigate();
+
   const [units, setUnits] = useState([]);
   const [unitsError, setUnitsError] = useState(false);
   const [ingredientNames, setIngredientNames] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingRecipe, setLoadingRecipe] = useState(isEditMode);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
@@ -50,13 +55,15 @@ function RecipeForm() {
   const [steps, setSteps] = useState([EMPTY_STEP]);
   const [ingredients, setIngredients] = useState([{ ...EMPTY_INGREDIENT }]);
 
+  // Snapshot de l'état initial en mode édition, pour calculer isDirty correctement
+  const initialSnapshot = useRef(null);
+
   const [leaveOpen, setLeaveOpen] = useState(false);
 
-  const isDirty =
-    fields.name.trim() !== "" ||
-    fields.description.trim() !== "" ||
-    ingredients.some(ing => ing.name.trim() !== "") ||
-    steps.some(s => s.trim() !== "");
+  const isDirty = initialSnapshot.current === null
+    ? (fields.name.trim() !== "" || fields.description.trim() !== "" ||
+       ingredients.some(ing => ing.name.trim() !== "") || steps.some(s => s.trim() !== ""))
+    : JSON.stringify({ fields, steps, ingredients }) !== initialSnapshot.current;
 
   // Interception fermeture onglet / rechargement
   useEffect(() => {
@@ -72,6 +79,37 @@ function RecipeForm() {
       console.error("Impossible de charger les suggestions d'ingrédients.");
     });
   }, []);
+
+  // Chargement de la recette existante en mode édition
+  useEffect(() => {
+    if (!isEditMode) return;
+    fetchRecipe(id).then((recipe) => {
+      const loadedFields = {
+        name: recipe.name,
+        description: recipe.description,
+        servings: recipe.servings,
+        prep_time: recipe.prep_time,
+        cook_time: recipe.cook_time,
+      };
+      const loadedSteps = recipe.steps.length ? recipe.steps : [EMPTY_STEP];
+      const loadedIngredients = recipe.ingredients.map(ing => ({
+        name: ing.name,
+        quantity: String(ing.quantity),
+        unit: ing.unit,
+      }));
+      setFields(loadedFields);
+      setSteps(loadedSteps);
+      setIngredients(loadedIngredients);
+      initialSnapshot.current = JSON.stringify({
+        fields: loadedFields,
+        steps: loadedSteps,
+        ingredients: loadedIngredients,
+      });
+      setLoadingRecipe(false);
+    }).catch(() => {
+      navigate("/");
+    });
+  }, [id, isEditMode, navigate]);
 
   function updateField(e) {
     setFields(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -110,16 +148,23 @@ function RecipeForm() {
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
+    const payload = {
+      ...fields,
+      servings: Number(fields.servings),
+      prep_time: Number(fields.prep_time),
+      cook_time: Number(fields.cook_time),
+      steps: steps.filter(s => s.trim()),
+      ingredients: ingredients.filter(ing => ing.name.trim() && ing.quantity && ing.unit),
+    };
     try {
-      const recipe = await createRecipe({
-        ...fields,
-        servings: Number(fields.servings),
-        prep_time: Number(fields.prep_time),
-        cook_time: Number(fields.cook_time),
-        steps: steps.filter(s => s.trim()),
-        ingredients: ingredients.filter(ing => ing.name.trim() && ing.quantity && ing.unit),
-      });
-      navigate(`/recettes/${recipe.id}`);
+      if (isEditMode) {
+        const recipe = await updateRecipe(id, payload);
+        toast.success("Recette mise à jour");
+        navigate(`/recettes/${recipe.id}`);
+      } else {
+        const recipe = await createRecipe(payload);
+        navigate(`/recettes/${recipe.id}`);
+      }
     } catch (err) {
       setErrors(err);
     } finally {
@@ -127,16 +172,20 @@ function RecipeForm() {
     }
   }
 
+  if (loadingRecipe) {
+    return <div className="page"><p className="text-muted">Chargement…</p></div>;
+  }
+
   return (
     <div className="page">
       <button
         type="button"
         className="link-back"
-        onClick={() => isDirty ? setLeaveOpen(true) : navigate("/")}
+        onClick={() => isDirty ? setLeaveOpen(true) : navigate(isEditMode ? `/recettes/${id}` : "/")}
       >
-        ← Retour aux recettes
+        {isEditMode ? "← Retour à la recette" : "← Retour aux recettes"}
       </button>
-      <h1>Nouvelle recette</h1>
+      <h1>{isEditMode ? "Modifier la recette" : "Nouvelle recette"}</h1>
 
       <form className="recipe-form" onSubmit={handleSubmit}>
 
@@ -301,7 +350,7 @@ function RecipeForm() {
         <button type="submit" className="btn-primary btn-full" disabled={submitting}>
           {submitting
             ? <><span className="btn-spinner" /> Enregistrement…</>
-            : "Créer la recette"}
+            : isEditMode ? "Enregistrer les modifications" : "Créer la recette"}
         </button>
 
       </form>
@@ -318,7 +367,7 @@ function RecipeForm() {
             <button className="btn-secondary" onClick={() => setLeaveOpen(false)}>
               Continuer la saisie
             </button>
-            <button className="btn-danger" onClick={() => navigate("/")}>
+            <button className="btn-danger" onClick={() => navigate(isEditMode ? `/recettes/${id}` : "/")}>
               Quitter
             </button>
           </DialogFooter>

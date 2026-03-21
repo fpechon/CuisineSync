@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import useMealPlanStore from "../store/mealPlanStore";
-import { fetchRecipe } from "../services/recipes";
+import { fetchRecipe, deleteRecipe } from "../services/recipes";
 import { getRecipeColor } from "../lib/recipeColor";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "../components/ui/dialog";
 
 function formatQty(qty) {
   const n = Number(qty);
@@ -12,11 +20,14 @@ function formatQty(qty) {
 
 function RecipeDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState(null);
   const [checkedIngredients, setCheckedIngredients] = useState(new Set());
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { isSelected, addRecipe, removeRecipe } = useMealPlanStore();
 
   useEffect(() => {
@@ -66,6 +77,20 @@ function RecipeDetail() {
   const color = getRecipeColor(recipe.name);
   const totalTime = recipe.prep_time + recipe.cook_time;
 
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      await deleteRecipe(recipe.id);
+      toast.success("Recette supprimée");
+      navigate("/");
+    } catch {
+      toast.error("Impossible de supprimer la recette");
+      setDeleteOpen(false);
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   function handleToggle() {
     if (selected) {
       removeRecipe(recipe.id);
@@ -90,6 +115,16 @@ function RecipeDetail() {
           {totalTime > 0 && <span>⏱ {totalTime} min au total</span>}
           <span>👥 {recipe.servings} portions</span>
         </div>
+        {recipe.is_owner && (
+          <div className="recipe-hero-actions">
+            <Link to={`/recettes/${recipe.id}/modifier`} className="btn-secondary btn-small">
+              Modifier
+            </Link>
+            <button className="btn-danger btn-small" onClick={() => setDeleteOpen(true)}>
+              Supprimer
+            </button>
+          </div>
+        )}
       </div>
 
       {recipe.description && (
@@ -153,6 +188,24 @@ function RecipeDetail() {
           )}
         </section>
       </div>
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="dialog-paprika">
+          <DialogHeader>
+            <DialogTitle>Supprimer la recette ?</DialogTitle>
+            <DialogDescription>
+              Cette action est irréversible. La recette sera définitivement supprimée.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button className="btn-secondary" onClick={() => setDeleteOpen(false)} disabled={deleting}>
+              Annuler
+            </button>
+            <button className="btn-danger" onClick={handleDelete} disabled={deleting}>
+              {deleting ? <><span className="btn-spinner" /> Suppression…</> : "Supprimer"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
