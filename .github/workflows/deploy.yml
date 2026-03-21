@@ -7,9 +7,56 @@ on:
   workflow_dispatch:
 
 jobs:
+  test-backend:
+    name: Tests back-end
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: test
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: back-end
+
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      SECRET_KEY: ci-secret-key-not-used-in-production
+      POSTGRES_DB: test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "back-end/uv.lock"
+
+      - name: Installer les dépendances Python
+        run: uv sync --frozen
+
+      - name: Lancer les tests Django
+        run: uv run python manage.py test --verbosity=2
+
   deploy:
     name: Deploy via SSH
     runs-on: ubuntu-latest
+    needs: test-backend
 
     steps:
       - name: Deploy to VPS
@@ -23,4 +70,8 @@ jobs:
             cd /home/deploy/CuisineSync
             git pull origin main
             docker compose up -d --build
+            echo "Vérification santé de l'API..."
+            sleep 8
+            curl --fail --silent --max-time 15 http://localhost:8000/api/v1/health/ \
+              || (echo "Healthcheck échoué !" && exit 1)
             echo "Déploiement terminé avec succès."
