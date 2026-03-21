@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import useMealPlanStore from "../store/mealPlanStore";
 import { fetchRecipe, deleteRecipe } from "../services/recipes";
 import { getRecipeColor } from "../lib/recipeColor";
+import AddToCartDialog from "../components/AddToCartDialog";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ function RecipeDetail() {
   const [checkedIngredients, setCheckedIngredients] = useState(new Set());
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [cartDialogOpen, setCartDialogOpen] = useState(false);
   const { isSelected, addRecipe, removeRecipe } = useMealPlanStore();
 
   useEffect(() => {
@@ -95,12 +97,17 @@ function RecipeDetail() {
     if (selected) {
       removeRecipe(recipe.id);
       toast("Retiré du panier", {
-        action: { label: "Annuler", onClick: () => addRecipe(recipe.id) },
+        action: { label: "Annuler", onClick: () => addRecipe(recipe.id, recipe.servings) },
       });
     } else {
-      addRecipe(recipe.id);
-      toast.success("Ajouté au panier");
+      setCartDialogOpen(true);
     }
+  }
+
+  function handleCartConfirm(servings) {
+    addRecipe(recipe.id, servings);
+    setCartDialogOpen(false);
+    toast.success("Ajouté au panier");
   }
 
   return (
@@ -188,6 +195,13 @@ function RecipeDetail() {
           )}
         </section>
       </div>
+      <AddToCartDialog
+        open={cartDialogOpen}
+        onOpenChange={setCartDialogOpen}
+        recipe={recipe}
+        onConfirm={handleCartConfirm}
+      />
+
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="dialog-paprika">
           <DialogHeader>

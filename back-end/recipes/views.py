@@ -3,9 +3,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Ingredient, MealPlan, Recipe
+from .models import Ingredient, MealPlan, MealPlanRecipe, Recipe
 from .permissions import IsOwnerOrReadOnly
-from .serializers import RecipeCreateSerializer, RecipeDetailSerializer, RecipeListSerializer
+from .serializers import (
+    MealPlanRecipeAddSerializer,
+    MealPlanRecipeUpdateSerializer,
+    MealPlanSerializer,
+    RecipeCreateSerializer,
+    RecipeDetailSerializer,
+    RecipeListSerializer,
+)
 from .units import UNITS
 
 
@@ -60,8 +67,9 @@ class IngredientListView(APIView):
         return Response(list(names))
 
 
-def _meal_plan_response(meal_plan):
-    return Response({"recipe_ids": list(meal_plan.recipes.values_list("id", flat=True))})
+def _meal_plan_response(meal_plan, status_code=status.HTTP_200_OK):
+    obj = MealPlan.objects.prefetch_related("meal_plan_recipes__recipe").get(pk=meal_plan.pk)
+    return Response(MealPlanSerializer(obj).data, status=status_code)
 
 
 class MealPlanView(APIView):
@@ -71,7 +79,7 @@ class MealPlanView(APIView):
 
     def delete(self, request):
         meal_plan, _ = MealPlan.objects.get_or_create(user=request.user)
-        meal_plan.recipes.clear()
+        MealPlanRecipe.objects.filter(meal_plan=meal_plan).delete()
         return _meal_plan_response(meal_plan)
 
 
@@ -81,11 +89,36 @@ class MealPlanRecipeView(APIView):
             recipe = Recipe.objects.get(pk=pk)
         except Recipe.DoesNotExist:
             return Response({"detail": "Recette introuvable."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = MealPlanRecipeAddSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        requested_servings = serializer.validated_data["servings"]
+
         meal_plan, _ = MealPlan.objects.get_or_create(user=request.user)
-        meal_plan.recipes.add(recipe)
+        entry, created = MealPlanRecipe.objects.get_or_create(
+            meal_plan=meal_plan,
+            recipe=recipe,
+            defaults={"servings": requested_servings if requested_servings is not None else recipe.servings},
+        )
+        if not created and requested_servings is not None:
+            entry.servings = requested_servings
+            entry.save()
+        return _meal_plan_response(meal_plan)
+
+    def patch(self, request, pk):
+        meal_plan = MealPlan.objects.filter(user=request.user).first()
+        if not meal_plan:
+            return Response({"detail": "Panier introuvable."}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            entry = MealPlanRecipe.objects.get(meal_plan=meal_plan, recipe_id=pk)
+        except MealPlanRecipe.DoesNotExist:
+            return Response({"detail": "Recette absente du panier."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = MealPlanRecipeUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        entry.servings = serializer.validated_data["servings"]
+        entry.save()
         return _meal_plan_response(meal_plan)
 
     def delete(self, request, pk):
         meal_plan, _ = MealPlan.objects.get_or_create(user=request.user)
-        meal_plan.recipes.remove(pk)
+        MealPlanRecipe.objects.filter(meal_plan=meal_plan, recipe_id=pk).delete()
         return _meal_plan_response(meal_plan)

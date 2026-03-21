@@ -7,15 +7,19 @@ import { fetchRecipe } from "../services/recipes";
 const CHECKED_KEY = "cs_shopping_checked";
 const BASKET_KEY = "cs_shopping_basket_key";
 
-function aggregateIngredients(recipes) {
+function aggregateIngredients(recipes, servingsMap) {
   const map = {};
   for (const recipe of recipes) {
+    const baseServings = recipe.servings || 1;
+    const targetServings = servingsMap[recipe.id] ?? 1;
+    const ratio = targetServings / baseServings;
     for (const ing of recipe.ingredients) {
       const key = `${ing.name}__${ing.unit}`;
+      const scaledQty = parseFloat(ing.quantity) * ratio;
       if (map[key]) {
-        map[key].quantity += parseFloat(ing.quantity);
+        map[key].quantity += scaledQty;
       } else {
-        map[key] = { name: ing.name, quantity: parseFloat(ing.quantity), unit: ing.unit };
+        map[key] = { name: ing.name, quantity: scaledQty, unit: ing.unit };
       }
     }
   }
@@ -23,12 +27,15 @@ function aggregateIngredients(recipes) {
 }
 
 function ShoppingList() {
-  const { selectedIds } = useMealPlanStore();
+  const { selectedIds, servingsMap } = useMealPlanStore();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const basketKey = selectedIds.join(",");
 
-  // Lazy init : lit localStorage une seule fois au montage, évite la race condition
+  const basketKey = selectedIds
+    .map((id) => `${id}:${servingsMap[id] ?? 1}`)
+    .join(",");
+
+  // Lazy init: reads localStorage once at mount, avoids race condition
   const [checked, setChecked] = useState(() => {
     try {
       const storedKey = localStorage.getItem(BASKET_KEY);
@@ -38,12 +45,12 @@ function ShoppingList() {
     } catch { return {}; }
   });
 
-  // Persist checked à chaque changement (jamais {} au 1er render grâce au lazy init)
+  // Persist checked on each change
   useEffect(() => {
     localStorage.setItem(CHECKED_KEY, JSON.stringify(checked));
   }, [checked]);
 
-  // Reset si le panier change après le montage
+  // Reset if basket changes after mount
   useEffect(() => {
     const storedKey = localStorage.getItem(BASKET_KEY);
     if (storedKey !== basketKey) {
@@ -77,7 +84,7 @@ function ShoppingList() {
     </div>
   );
 
-  const ingredients = aggregateIngredients(recipes);
+  const ingredients = aggregateIngredients(recipes, servingsMap);
   const checkedCount = ingredients.filter((ing) => checked[`${ing.name}__${ing.unit}`]).length;
 
   function copyList() {

@@ -1,7 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from .models import Ingredient, Recipe, RecipeIngredient
+from .models import Ingredient, MealPlan, MealPlanRecipe, Recipe, RecipeIngredient
 from .units import UNITS
 
 
@@ -116,3 +116,31 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 quantity=ing["quantity"],
                 unit=ing["unit"],
             )
+
+
+# --- Meal Plan serializers ---
+
+class MealPlanRecipeSerializer(serializers.ModelSerializer):
+    recipe_id = serializers.IntegerField(source="recipe.id", read_only=True)
+    recipe_name = serializers.CharField(source="recipe.name", read_only=True)
+    recipe_base_servings = serializers.IntegerField(source="recipe.servings", read_only=True)
+
+    class Meta:
+        model = MealPlanRecipe
+        fields = ["recipe_id", "recipe_name", "recipe_base_servings", "servings"]
+
+
+class MealPlanSerializer(serializers.ModelSerializer):
+    entries = MealPlanRecipeSerializer(source="meal_plan_recipes", many=True, read_only=True)
+
+    class Meta:
+        model = MealPlan
+        fields = ["entries"]
+
+
+class MealPlanRecipeAddSerializer(serializers.Serializer):
+    servings = serializers.IntegerField(min_value=1, required=False, default=None)
+
+
+class MealPlanRecipeUpdateSerializer(serializers.Serializer):
+    servings = serializers.IntegerField(min_value=1)

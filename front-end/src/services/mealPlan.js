@@ -1,17 +1,33 @@
 import { apiFetch } from "./api";
 
 export async function getMealPlan() {
-  return apiFetch("/meal-plan/");
+  const data = await apiFetch("/meal-plan/");
+  return { entries: data.entries ?? [] };
 }
 
-export async function addRecipeToMealPlan(id) {
-  return apiFetch(`/meal-plan/recipes/${id}/`, { method: "POST" });
+export async function addRecipeToMealPlan(id, servings) {
+  const body = servings !== undefined ? { servings } : undefined;
+  const data = await apiFetch(`/meal-plan/recipes/${id}/`, {
+    method: "POST",
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+  return { entries: data.entries ?? [] };
 }
 
 export async function removeRecipeFromMealPlan(id) {
-  return apiFetch(`/meal-plan/recipes/${id}/`, { method: "DELETE" });
+  const data = await apiFetch(`/meal-plan/recipes/${id}/`, { method: "DELETE" });
+  return { entries: data.entries ?? [] };
 }
 
 export async function clearMealPlan() {
-  return apiFetch("/meal-plan/", { method: "DELETE" });
+  const data = await apiFetch("/meal-plan/", { method: "DELETE" });
+  return { entries: data.entries ?? [] };
+}
+
+export async function updateRecipeServings(id, servings) {
+  const data = await apiFetch(`/meal-plan/recipes/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify({ servings }),
+  });
+  return { entries: data.entries ?? [] };
 }
